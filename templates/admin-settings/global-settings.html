@@ -1,0 +1,117 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Name</label>
+            <input type="text" name="name" class="form-control" v-bind:value="settings.name">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Short Name</label>
+            <input type="text" name="short_name" class="form-control" v-bind:value="settings.short_name">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Email</label>
+            <input type="text" name="email" class="form-control" v-bind:value="settings.email">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Phone</label>
+            <input type="text" name="phone" class="form-control" v-bind:value="settings.phone">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="control-label">Company Website</label>
+            <input type="text" name="website" class="form-control" v-bind:value="settings.website">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="control-label">Address</label>
+            <textarea name="address" class="form-control" rows="8">[[ settings.address ]]</textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Locale</label>
+            <select name="lang" id="lang" class="form-control" v-bind:value="settings.locale">
+                <option value="en"  selected >en</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 d-none">
+        <div class="form-group">
+            <label class="control-label">Layout</label>
+            <select name="app_layout" id="app_layout" class="form-control" v-bind:value="settings.name">
+                <option value="sidebar" >Sidebar</option>
+                <option value="top" >Top</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Currency</label>
+            <select name="currency_id" id="currency_id" class="form-control" v-bind:value="settings.currency_id">
+                    <option value="1" >Dollars - ($)</option>
+                    <option value="2" >Pounds - (£)</option>
+                    <option value="3" >Euros - (€)</option>
+                    <option value="4" >Rupee - (₹)</option>
+                    <option value="5" >Ghanaian cedi - (GH¢)</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label for="exampleInputPassword1">Company Logo</label>
+            <div class="col-md-12">
+                <div class="fileinput fileinput-new" data-provides="fileinput">
+                    <div class="fileinput-new thumbnail col-sm-12 col-md-6">
+                        <img v-bind:src="settings.logo" width="100%" alt=""/>
+                    </div>
+                    <div class="col">
+                        <span class="btn btn-info btn-file" style="max-width: 100%;">
+                            <span class="fileinput-new">Select Image </span>
+                            <span class="fileinput-exists">Change </span>
+                            <input type="file" name="logo" id="logo">
+                        </span>
+                        <a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row d-none">
+    <div class="col-md-4">
+        <div class="form-group">
+            <div class="control-label">Update Application</div>
+            <label class="custom-switch mt-2">
+                <input type="checkbox" name="app_update" class="custom-switch-input" v-bind:value="settings.name" checked >
+                <span class="custom-switch-indicator"></span>
+            </label>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <div class="control-label">App Debug</div>
+            <label class="custom-switch mt-2">
+                <input type="checkbox" name="app_debug" class="custom-switch-input" v-bind:value="settings.name"  checked >
+                <span class="custom-switch-indicator"></span>
+            </label>
+        </div>
+    </div>
+</div>

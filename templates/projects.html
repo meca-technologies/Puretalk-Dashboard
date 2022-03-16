@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="PureTalk Dashboard">
+  <meta name="author" content="Creative Tim">
+  <title>{{ companyName }} - {{ pageTitle }}</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../static/img/favicon.png">
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+  <!-- Icons -->
+  <link rel="stylesheet" href="../static/vendor/nucleo/css/nucleo.css" type="text/css">
+  <link rel="stylesheet" href="../static/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+  <!-- Page plugins -->
+  <!-- Argon CSS -->
+  <link rel="stylesheet" href="../static/css/argon.min.css?v=1.3.11.1" type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+  
+  <link rel="stylesheet" href="../static/css/base.css?v=1.3.11.1" type="text/css">
+  <link rel="stylesheet" href="/../static/css/convo.css?v=1.3.11.1" type="text/css">
+
+  <style>
+        .company-row{
+        margin-top: 1.7em;
+        }
+        .company-row:first-child{
+            margin-top: 0em;
+        }
+  </style>
+    
+  {% block headScripts %}{% endblock %}
+</head>
+
+<body class="bg-default">
+  <!-- Main content -->
+  <div class="main-content bg-default" id="panel">
+    <!-- Topnav -->
+    <nav class="navbar navbar-top navbar-expand navbar-light bg-white border-bottom" style="background-color: #1d355e!important; box-shadow: 0 0 2rem 0 rgb(0 0 0 / 15%)">
+      <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          
+          <div class="sidenav-toggler d-sm-block d-md-none" data-action="sidenav-unpin" data-target="#sidenav-main">
+            <div class="sidenav-toggler-inner">
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+            </div>
+          </div>
+          <!-- Navbar links -->
+          <ul class="navbar-nav align-items-center ml-md-auto ">
+          </ul>
+          <ul class="navbar-nav align-items-center  ml-auto ml-md-0 ">
+            <li class="nav-item dropdown">
+              <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="media align-items-center">
+                  <span class="avatar avatar-sm rounded-circle">
+                    <img alt="Image placeholder" src="../static/img/profile/{% if session['user']['image'] %}{{session['user']['image']}}{% else %}default.png{% endif %}">
+                  </span>
+                  <div class="media-body  ml-2  d-none d-lg-block">
+                    <span class="mb-0 text-sm  font-weight-bold text-white">{{session['user']['first_name']}} {% if session['user']['last_name'] %}{{session['user']['last_name']}}{% endif %}</span>
+                  </div>
+                </div>
+              </a>
+              <div class="dropdown-menu  dropdown-menu-right ">
+                <a href="/logout" class="dropdown-item">
+                  <i class="ni ni-user-run"></i>
+                  <span>Logout</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="row justify-content-center mt-4">
+        <div class="card border border-default text-center convo-card-bg bg-default text-white col-lg-3 col-sm-12">
+            <div class="card-header p-3" v-bind:holder-index="index1" style="background-image: none; background: none;">
+                <h2 style="text-align: center;" class=" text-white">Select a Flow</h2>
+            </div>
+            <div class="card-body">
+              {% for flow in flows %}
+                <div class="row">
+                    <div class="card col-12 p-4 btn border-default bg-default text-white">
+                        <a href="builder?flowid={{flow.id}}" class="row">
+                            <div class="col-3 mb-3">
+                                <div class="bg-success border border-white shadow text-center mt-3" style="width: 50px;height: 50px; border-radius: 25px;">
+                                    <h1 class="text-white mt-1">TF</h1>
+                                </div>
+                            </div>
+                            <div class="col-6 text-left">
+                                <h2 class="mt-2 text-white">{{flow.name}}</h2>
+                                <small><i>{{flow.updated_at}}</i></small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+<div class="row col-12 justify-content-end mt-2" style="position: fixed; top: 0px;">
+  <div class="col-sm-10 col-md-4" id="alert-holder" style="display: none;">
+    <div v-for="alert in alerts">
+      <div v-if="alert.status == 'danger'" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+          <span class="alert-icon"><i class="ni ni-air-baloon"></i></span>
+          <span class="alert-text"><strong>Failure!</strong> [[ alert.message ]]</span>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+      <div v-else class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+          <span class="alert-icon"><i class="ni ni-check-bold"></i></span>
+          <span class="alert-text"><strong>Success!</strong> [[ alert.message ]]</span>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Argon Scripts -->
+<!-- Core -->
+<script src="../static/vendor/jquery/dist/jquery.min.js"></script>
+<script src="../static/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../static/vendor/js-cookie/js.cookie.js"></script>
+<script src="../static/vendor/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+<script src="../static/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
+<!-- Optional JS -->
+<script src="../static/vendor/chart.js/dist/Chart.min.js"></script>
+<script src="../static/vendor/chart.js/dist/Chart.extension.js"></script>
+<!-- Argon JS -->
+<script src="../static/js/argon.js?v=1.3.11.1"></script>
+<script src="../static/js/base.js?v=1.3.11.1"></script>
+<script src="../static/js/sidebar.js?v=1.3.11.1"></script>
+
+<script src="../static/js/vueJS/companies.js?v=1.3.11.1"></script>
+{% block scripts %}{% endblock %}
+</body>
+
+</html>

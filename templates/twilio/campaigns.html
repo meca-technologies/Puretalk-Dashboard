@@ -1,0 +1,733 @@
+{% extends "twilio/layout.html" %}
+{% block body %}
+
+<link rel=stylesheet href="/static/js/vendors/codemirror/codemirror.css">
+<link rel=stylesheet href="/static/js/vendors/codemirror/isotope.css">
+<script src="/static/js/vendors/codemirror/codemirror.js"></script>
+<script src="/static/js/vendors/codemirror/javascript.js"></script>
+<script src="/static/js/vendors/codemirror/active-line.js"></script>
+<script src="/static/js/vendors/codemirror/matchbrackets.js"></script>
+
+<style>
+    .CodeMirror{
+        height: auto!important;
+    }
+    .variable-item:hover{
+        color: white;
+        background-color: #5e72e4!important;
+        cursor: pointer;
+    }
+</style>
+
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Campaigns</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#campaign-add" class="sidebar-toggle btn btn-info"><span style="font-weight: 1000;">+</span> Add New Campaign</a>
+    </div>
+    <div class="col-xl-12 mt-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Campaigns</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-12" id="campaign-body-loading">
+                <center><img src="/static/img/spinner.svg" id="campaigns-loading" width="100px"></center>
+            </div>
+            <div class="table-responsive" id="campaign-body" style="display: none;">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" class="d-none">ID</th>
+                            <th scope="col">Campaign Name</th>
+                            <th scope="col">Leads</th>
+                            <th scope="col">Progress</th>
+                            <th scope="col">Started On</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="campaign in campaigns">
+                            <td scope="row" class="d-none">[[ campaign.id ]]</td>
+                            <td scope="row">[[ campaign.name ]]</td>
+                            <td scope="row">
+                                <a v-bind:href="setLocationUrl(campaign.id)" class=" btn btn-primary btn-sm btn-icon icon-left" v-bind:campaign-id="campaign.id">View Leads</a>
+                            </td>
+                            <td scope="row">
+                                <span>Completed Leads: [[ campaign.total_leads - campaign.remaining_leads ]]/[[ campaign.total_leads ]]</span>
+                                <div class="progress mt-2" style="width: 100%;">
+                                    <div class="progress-bar" :class="campaign.status === 'started' ? 'bg-success':'bg-danger'" role="progressbar" v-bind:aria-valuenow="campaign.total_leads - campaign.remaining_leads" aria-valuemin="0" v-bind:aria-valuemax="campaign.total_leads" style="width: 0%;"></div>
+                                </div>
+                            </td>
+                            <td scope="row">[[ formatNiceDateTime(campaign.started_on) ]]</td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#campaign-edit" class="sidebar-toggle btn btn-info btn-icon icon-left campaign-edit custom-popover" v-bind:campaign-id="campaign.id" data-toggle="tooltip" data-original-title="Edit" popover-text="Edit Campaign"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left campaign-delete" v-bind:campaign-id="campaign.id" data-toggle="modal" data-target="#campaign-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                    <a v-if="campaign.agent_login" v-bind:href="formatAgentLogin(campaign.id, campaign.name)" target="_blank" class="btn btn-primary">Agent Login</a> 
+                                    <!--<button class="btn btn-success btn-icon icon-left request-test custom-popover" popover-text="Test Campaign" v-bind:campaign-id="campaign.id" data-toggle="modal" data-target="#request-test" data-original-title="Delete">Test Campaign</button>-->
+                                </div> 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-add">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add Campaign</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign Name</small>
+                    <input type="text" class="form-control" placeholder="Campaign Name" id="addCampaignName" v-bind:value="details.name">
+                </div>
+            </div>
+            <div class="row d-none" id="user-body">
+                <div class="col-12">
+                    <small>Campaign Members</small>
+                </div>
+                <div class="col-6" v-for="user in users">
+                    <small><b>[[ user.first_name ]] [[ user.last_name ]]</b></small>
+                    <input type="checkbox" class="campaignAddUser" v-bind:user-id="user.id"><br>
+                </div><br>
+            </div>
+            <div class="row mt-4" id="form-builder">
+                <div class="col">
+                    <small>Form Layout</small>
+                    <select class="form-control" id="addCampaignForm">
+                        <option v-for="form in forms" v-bind:value="form.id">[[ form.form_name ]]</option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Auto Reference Enabled</small>
+                    <label class="switch" style="top:6px">
+                        <input type="checkbox" id="addCampaignARE">
+                        <span class="slider round"></span>
+                    </label><br>
+                </div>
+            </div>
+            <div class="row mt-4 d-none">
+                <div class="col">
+                    <small>Auto Reference Prefix</small>
+                    <input type="text" class="form-control" id="addCampaignARP" placeholder="Auto Reference Prefix"><br>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <a href="#" id="add-company" class="btn btn-success">Add New Campaign</a>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.name ]]</h2>
+            <hr>
+            <div id="campaign-edit-loading" >
+                <center>
+                    <img src="/static/img/spinner.svg"width="100px">
+                    <p>Loading Campaign...</p>
+                </center>
+            </div>
+            <div id="campaign-edit-body">
+                <b class="mt-4">Campaign Details</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small>Campaign Name</small>
+                        <input type="text" class="form-control" placeholder="Campaign Name" id="campaignEditName" v-bind:value="details.name"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Transfer Phone #</small>
+                        <input type="text" id="campaignEditDID" class="form-control" placeholder="Transfer Phone #" v-bind:value="details.did"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Agent Login</small>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="campaignEditAgentLogin" class="dayEnabled" :checked="details.agent_login === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                </div><br>                
+                <div class="row d-none">
+                    <div class="col-12">
+                        <small>Campaign Members</small>
+                    </div>
+                    <div class="col-6" v-for="user in details.user_data">
+                        <small><b>[[ user.first_name ]] [[ user.last_name ]]</b></small>
+                        <input type="checkbox" class="campaignEditUser" v-bind:user-id="user.id" checked><br>
+                    </div><br>
+                </div>
+                <div class="row mt-4 d-none">
+                    <div class="col">
+                        <small>Auto Reference Enabled</small>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="campaignEditAutoRef" :checked="details.auto_reference === 1">
+                            <span class="slider round"></span>
+                        </label><br>
+                    </div>
+                </div>
+                <div class="row mt-4 d-none">
+                    <div class="col">
+                        <small>Auto Reference Prefix</small>
+                        <input type="text" id="campaignEditAutoPre" class="form-control" placeholder="Auto Reference Prefix" v-bind:value="details.auto_reference_prefix"><br>
+                    </div>
+                </div>
+                <b class="mt-4">Caller ID Setup</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small>Caller ID</small>
+                        <div class="row">
+                            <div class="col-9">
+                                <select id="campaignEditCallerID" class="form-control">
+                                    <option value="None">Select Caller ID...</option>
+                                    <option v-for="caller_id in caller_ids" v-bind:value="caller_id.id" v-bind:ciname="caller_id.name" v-bind:cid="caller_id.caller_id">[[ caller_id.friendly_name ]][[ caller_id.name ]] - [[ caller_id.caller_id ]]</option>
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <a href="#" id="add-caller-id" class="btn btn-success">Add</a>
+                            </div>
+                        </div>
+                        <ul style="list-style: none;" class="mt-4 card text-white bg-default p-4">
+                            <li class="caller-id-list-item row mt-2" style="list-style: none;" v-for="caller_id in details.caller_ids" v-bind:ciname="caller_id.name" v-bind:cid="caller_id.caller_id">
+                                <a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger caller-id-list-item-delete" style="float: right;"><i class="fas fa-trash"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<span><b>[[ caller_id.name ]] - [[ caller_id.caller_id ]]</b></span>
+                            </li>
+                        </ul>
+                        <br>
+                    </div>
+                </div>
+                <b class="mt-4">Virtual Agent</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small class="d-none">Company</small>
+                        <select class="form-control select2 select2-hidden-accessible" id="virtual-agent-body" name="virtual-agent-body" v-bind:value="details.virtual_agent_id" tabindex="-1" aria-hidden="true">
+                            <option value="None">Select Virtual Agent...</option>
+                            <option v-for="agent in virtualAgents" v-bind:value="agent.id">[[ agent.name ]]</option>
+                        </select>
+                    </div>
+                </div><br>
+                <b class="mt-4">Call Volume</b>
+                <hr>
+                <div class="row tab-group">
+                    <a class="col btn btn-primary tab-btn agent-type active" id="tab1" tab="tab1-group" href="#">Flat Call Maximum</a>
+                    <a class="col btn btn-primary agent-type tab-btn" id="tab2" tab="tab2-group" href="#">Based On Available Agents</a>
+                </div>
+                <div class="row mt-4">
+                    <div id="tab1-group" class="tab col-12">
+                        <small>Call amount</small>
+                        <input type="number" min="1" v-bind:value="getFlatCall(details.num_agents, details.calls_per_agent)" class="form-control" id="total-calls">
+                        <input type="hidden" value="1" class="form-control">
+                    </div>
+                    <div id="tab2-group" class="tab col-12" style="display: none;">
+                        <small># of agents</small>
+                        <input type="number" min="1" v-bind:value="details.num_agents" class="form-control" id="num-agent"><br>
+                        <small class="mt-4">Calls Per Agents</small>
+                        <input type="number" min="1" v-bind:value="details.calls_per_agent" class="form-control" id="calls-per-agent">
+                    </div>
+                </div><br>
+                <b class="mt-4">Schedule</b>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Sunday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="sundayEnabled" class="dayEnabled" :checked="details.schedules.sunday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="sundayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="sundayGroup1" v-bind:value="convertNiceTime(details.schedules.sunday.start.time_full)" class="form-control timer" day-value="sunday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="sundayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="sundayGroup2" v-bind:value="convertNiceTime(details.schedules.sunday.stop.time_full)" class="form-control timer" day-value="sunday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Monday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="mondayEnabled"  class="dayEnabled" :checked="details.schedules.monday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="mondayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="mondayGroup1" v-bind:value="convertNiceTime(details.schedules.monday.start.time_full)" class="form-control timer" day-value="monday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="mondayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="mondayGroup2" v-bind:value="convertNiceTime(details.schedules.monday.stop.time_full)" class="form-control timer" day-value="monday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Tuesday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="tuesdayEnabled"  class="dayEnabled" :checked="details.schedules.tuesday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="mondayGroup"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="tuesdayGroup1" v-bind:value="convertNiceTime(details.schedules.tuesday.start.time_full)" class="form-control timer" day-value="tuesday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="tuesdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="tuesdayGroup2" v-bind:value="convertNiceTime(details.schedules.sunday.stop.time_full)" class="form-control timer" day-value="tuesday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Wednesday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="wednesdayEnabled"  class="dayEnabled" :checked="details.schedules.wednesday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="wednesdayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="wednesdayGroup1" v-bind:value="convertNiceTime(details.schedules.wednesday.start.time_full)" class="form-control timer" day-value="wednesday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="wednesdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="wednesdayGroup2" v-bind:value="convertNiceTime(details.schedules.wednesday.stop.time_full)" class="form-control timer" day-value="wednesday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Thursday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="thursdayEnabled"  class="dayEnabled" :checked="details.schedules.thursday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="thursdayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="thursdayGroup1" v-bind:value="convertNiceTime(details.schedules.thursday.start.time_full)" class="form-control timer" day-value="thursday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="thursdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="thursdayGroup2" v-bind:value="convertNiceTime(details.schedules.thursday.stop.time_full)" class="form-control timer" day-value="thursday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Friday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="fridayEnabled"  class="dayEnabled" :checked="details.schedules.friday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="fridayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="fridayGroup1" v-bind:value="convertNiceTime(details.schedules.friday.start.time_full)" class="form-control timer" day-value="friday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="fridayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="fridayGroup2" v-bind:value="convertNiceTime(details.schedules.friday.stop.time_full)" class="form-control timer" day-value="friday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Saturday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="saturdayEnabled"  class="dayEnabled" :checked="details.schedules.saturday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="saturdayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="saturdayGroup1" v-bind:value="convertNiceTime(details.schedules.saturday.start.time_full)" class="form-control timer" day-value="saturday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="saturdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="saturdayGroup2" v-bind:value="convertNiceTime(details.schedules.saturday.stop.time_full)" class="form-control timer" day-value="saturday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div><br>
+                <b class="mt-4">Lead Generation Webhook</b>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <small>Campaign URL</small>
+                    </div>
+                    <div class="col-9">
+                        <input class="form-control" id="campaign-token" v-bind:value="'https://dashboard.puretalk.ai/leads/generation/' + details.id" type="password">
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-primary copy-btn" data-target="campaign-token" ><i class="fa fa-copy"aria-hidden="true"></i></button>
+                        <span class="bg-danger text-white p-2 rounded" id="campaign-token-copied" style="position: relative; top: 15px; left: -4px; display: none;">Copied!</span>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <small>Whitelist URL</small>
+                    </div>
+                    <div class="col-12">
+                        <input class="form-control" id="campaign-white-url" v-bind:value="details.white_url" placeholder="Whitelist URL" type="text">
+                    </div>
+                </div><br>
+                <b class="mt-4">Call Transfer Webhook</b>
+                <hr>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <small><b>Endpoint</b></small>
+                    </div>
+                    <div class="col-12">
+                        <select class="form-control" id="campaign-request-method" style="width: 25%;display: inline-block;border-top-right-radius: 0px;border-bottom-right-radius: 0px;border-right: 0;" v-bind:value="details.xfer_method">
+                            <option value="GET" :checked="details.xfer_method == 'GET'">GET</option>
+                            <option value="POST" :checked="details.xfer_method == 'POST'">POST</option>
+                        </select><input class="form-control" id="campaign-xfer-url" v-bind:value="details.xfer_url" type="text" style="width: 75%;display: inline-block;border-top-left-radius: 0px;border-bottom-left-radius: 0px;">
+                    </div>
+                    <div class="col-12 mt-4">
+                        <ul class="nav nav-tabs custom-tab" id="myTab" role="tablist" style="border-bottom:0">
+                            <li class="nav-item">
+                                <a class="nav-link setting-link" tab-group="transfers" tab-target="transfers-headers-tab" data-toggle="tab" href="#transfers-headers-tab" role="tab" aria-controls="transfers-headers-tab" aria-selected="true">Headers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active setting-link" tab-group="transfers" tab-target="transfers-body-tab" data-toggle="tab" href="#transfers-body-tab" role="tab" aria-controls="transfers-body-tab" aria-selected="true">Body</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link setting-link" tab-group="transfers" tab-target="transfers-params-tab" data-toggle="tab" href="#transfers-params-tab" role="tab" aria-controls="transfers-params-tab" aria-selected="true">Parameters</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-12">
+                        <div class="setting-tab" tab-parent="transfers" id="transfers-headers-tab" role="tabpanel" aria-labelledby="transfers-headers-tab">
+                            <div class="p-4 hook-card">
+                                <div class="row justify-content-right mb-2">
+                                    <div class="col-10"><b class="mt-4">Header Assignments</b></div>
+                                    <div id="add-header" class="col-2 add-btn add-header-btn bg-default border">+</div>
+                                </div>
+                                <div v-for="(item, index) in headers" class="mb-4">
+                                    <div class="row">
+                                        <input class="col-10 form-control header-form-field mt-4" placeholder="Enter HTTP Header" v-bind:value="item.field" v-bind:header-index="index">
+                                        <div id="sub-header" class="col-2 sub-btn sub-header-btn border border-default" v-bind:header-index="index">-</div>
+                                    </div>
+                                    <div class="row">
+                                        <input class="col-10 form-control header-form-value mt-4" placeholder="Enter Header Value or [variable]" v-bind:value="item.value" v-bind:header-index="index">
+                                        <div class="col-2 sub-btn border border-default" style="visibility: hidden;">-</div>
+                                    </div>
+                                    <div class="row" v-bind:id="index + '-search-div'" style="display: none;">
+                                        <div class="bg-white rounded shadow col-10 border">
+                                            <div class="col p-1"><b v-bind:id="index + '-search'"></b></div>
+                                            <span v-bind:id="index + '-header-variable-body'">
+                                                <div class="col variable-item p-1" v-for="field in form.fields" v-bind:variable="field.field_name">[[ field.field_name ]]</div>
+                                            </span>
+                                        </div>
+                                        <div class="col-2 sub-btn border border-default" style="visibility: hidden;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="active setting-tab" tab-parent="transfers" id="transfers-body-tab" role="tabpanel" aria-labelledby="transfers-body-tab">
+                            <form><textarea id="code" name="code">[[ payload ]]</textarea></form>
+<div id="anchor"></div>
+<div id="variable_holder" class="bg-white rounded shadow" style="width: auto; max-width: 230px; position: relative; left: 0px; top: 0px; display: none;">
+    <div class="col p-1" style="border-top-left-radius: 5px;border-top-right-radius: 5px;"><b id="variable-search"></b></div>
+    <div class="col variable-item p-1" v-for="field in form.fields">[[ field.field_name ]]</div>
+</div>
+                        </div>
+                        <div class="setting-tab" tab-parent="transfers" id="transfers-params-tab" role="tabpanel" aria-labelledby="transfers-params-tab">
+                            <div class="p-4 hook-card">
+                                <div class="row justify-content-right mb-2">
+                                    <div class="col-10"><b class="mt-4">Parameter Assignments</b></div>
+                                    <div id="add-param" class="col-2 add-btn bg-default border">+</div>
+                                </div>
+                                <div v-for="(item, index) in params" class="mb-4">
+                                    <div class="row">
+                                        <input class="col-10 form-control params-form-field mt-4" placeholder="Enter Parameter" v-bind:value="item.field" v-bind:param-index="index">
+                                        <div id="sub-param" class="col-2 sub-btn sub-param-btn border border-default" v-bind:param-index="index">-</div>
+                                    </div>
+                                    <div class="row">
+                                        <input class="col-10 form-control params-form-value mt-4" placeholder="Enter Param Value or [variable]" v-bind:value="item.value" v-bind:param-index="index">
+                                        <div class="col-2 sub-btn border border-default" style="visibility: hidden;">-</div>
+                                    </div>
+                                    <div class="row" v-bind:id="index + '-param-search-div'" style="display: none;">
+                                        <div class="bg-white rounded shadow col-10 border">
+                                            <div class="col p-1"><b v-bind:id="index + '-param-search'"></b></div>
+                                            <span v-bind:id="index + '-param-variable-body'">
+                                                <div class="col variable-item p-1" v-for="field in form.fields" v-bind:variable="field.field_name">[[ field.field_name ]]</div>
+                                            </span>
+                                        </div>
+                                        <div class="col-2 sub-btn border border-default" style="visibility: hidden;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" data-toggle="modal" data-target="#request-test" id="request-test-btn" class="btn btn-default mt-4">Test Request</a>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-company" class="btn btn-success">Save Campaign</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bd-example-modal-xl" id="request-test" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none; z-index:9999999999999999999999999999; background: rgba(0, 0, 0, 0.5);" aria-hidden="true">
+    <div class="modal-dialog modal modal-default modal-dialog-centered modal-dialog modal-xl" id="request-test-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Request Test</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center" id="variables-body">
+                    <h2 style="color: white;">Variables</h2>
+                    <div class="row mb-2" style="text-align: left;" v-for="field in form.fields">
+                        <div class="form-control" style="width: 25%;display: inline-block;border-top-right-radius: 0px;border-bottom-right-radius: 0px;border-right: 0;">
+                            [[ field.field_name ]]
+                        </div>
+                        <input class="form-control variable-form" v-bind:varname="field.field_name" placeholder="Enter Variable Value" type="text" style="width: 75%;display: inline-block;border-top-left-radius: 0px;border-bottom-left-radius: 0px;">
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" id="send-request" class="btn btn-success">Send Request</a>
+                    </div>
+                </div>
+                <div class="py-3" id="response-body" style="display: none;">
+                    <h2 style="color: white;">Response</h2>
+                    <code><pre class="p-4 rounded" id="code-response" name="code-response"></pre></code>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/moment.min.js"></script>
+<script src="/static/vendor/bootstrap-datetimepicker.js"></script>
+<script src="static/js/vueJS/campaigns.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/formbuilder.js?v=1.3.11.1"></script>
+
+<script>
+    updateCampaigns();
+    $('body').on('click','.tab-btn', function(){
+        var tabID = $(this).attr("tab");
+        console.log(tabID);
+
+        var tabs = $(".tab");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            tabs[i].style.display = 'none';
+        }
+
+        var tabs = $(".tab-btn");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            $(tabs[i]).removeClass('active');
+        }
+
+        $(this).addClass('active');
+        document.getElementById(tabID).style.display = '';
+    });
+</script>
+<script>
+    $('body').on('click','.CodeMirror', function(){
+        var variable_holder = document.getElementById("variable_holder");
+        var selected = false;
+        var openBrace = false;
+        var held_shift = false;
+        var search_term = '';
+        var time_stamps = [];
+        var lowers = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'w', 'x', 'y', 'z'];
+        var uppers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z'];
+        var checkMe = setInterval(function(){
+            var focuses = document.getElementsByClassName("CodeMirror-focused");
+            if(focuses.length>0){
+                selected = true;
+                $( focuses[0] ).keydown(function(event) {
+                    if(event.key == 'Shift'){
+                        held_shift = true;
+                    }
+                })
+                $( focuses[0] ).keyup(function(event) {
+                    var timeStamp = String(event.timeStamp).substring(0, String(event.timeStamp).length-4);
+                    if (time_stamps.indexOf(timeStamp) == -1){
+                        time_stamps.push(timeStamp);
+                        if(event.key == '['){
+                            openBrace = true;
+                            variable_holder.style.display = '';
+                        }
+                        else if(event.key == ']'){
+                            openBrace = false;
+                            search_term = '';
+                            document.getElementById("variable-search").innerHTML = search_term;
+                            searchItems(search_term);
+                            variable_holder.style.display = 'none';
+                        }
+                        else if(event.key == 'Shift'){
+                            held_shift = false;
+                        }
+                        else if(event.key != 'Shift' && event.key != 'Enter' && event.key != 'Tab'){
+                            if(openBrace){
+                                if(event.key == 'Backspace'){
+                                    var cutoff = String(search_term).length-1;
+                                    if(cutoff>1){
+                                        search_term = String(search_term).substring(0, cutoff);
+                                    }
+                                    else{
+                                        search_term = '';
+                                    }
+                                    var text_value = document.getElementById("variable-search").innerHTML;
+                                    cutoff = String(text_value).length;
+                                    console.log(cutoff);
+                                }
+                                else{
+                                    var event_key = event.key;
+                                    try{
+                                        if(held_shift){
+                                            event_key = event_key.toUpperCase();
+                                        }
+                                    }catch(error){}
+                                    search_term += event_key;
+                                }
+                                document.getElementById("variable-search").innerHTML = search_term;
+                                searchItems(search_term);
+                            }
+                        }
+                    }
+                })
+            }
+            else if(selected){
+                search_term = '';
+                document.getElementById("variable-search").innerHTML = search_term;                
+                searchItems(search_term);
+                variable_holder.style.display = 'none';
+                selected = false;
+                openBrace = false;
+                clearInterval(checkMe);
+            }
+            if(openBrace){
+                var cursor_doms = document.getElementsByClassName("CodeMirror-cursor");
+
+                var bodyRect = document.getElementById("anchor").getBoundingClientRect()
+                var cursor_dom = cursor_doms[0];
+                elemRect = cursor_dom.getBoundingClientRect(),
+                offset_top = elemRect.top - bodyRect.top + 30;
+                offset_left = elemRect.left - bodyRect.left + 60;
+                variable_holder.style.display = '';
+                variable_holder.style.left = String(offset_left) + 'px';
+                variable_holder.style.top = String(offset_top) + 'px';
+            }
+        })
+    })
+    function searchItems(search_term){
+        search_term = search_term.toUpperCase();
+        var terms = document.getElementsByClassName("variable-item");
+        for(var i = 0; i<terms.length; i++){
+            txtValue = terms[i].textContent || terms[i].innerText;
+            if (txtValue.toUpperCase().indexOf(search_term) > -1) {
+                terms[i].style.display = "";
+            } else {
+                terms[i].style.display = "none";
+            }
+        }
+    }
+</script>
+{% endblock %}

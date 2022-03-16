@@ -1,0 +1,382 @@
+{% extends "vicidial/layout.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+  <div class="container-fluid">
+      <div class="header-body">
+          <div class="row align-items-center py-4">
+              <div class="col-lg-6 col-7">
+                  <h6 class="h2 text-white d-inline-block mb-0">Call History</h6>
+              </div>
+          </div>
+          
+          <div class="card col-12 p-4">
+            <b>Campaign</b>     
+            {% with loading_id='campaign-body-loading', display_me='1' %}
+            <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <select class="form-control select2 select2-hidden-accessible mt-2 lead-campaigns" id="campaign-body" name="campaign-body" tabindex="-1" aria-hidden="true" style="display: none;">
+                <option value="">Select Campaign...</option>
+                <option v-for="(item, index) in campaigns" v-bind:value="item.campaign_id" v-if="item.active == 'Y'">[[ item.campaign_name ]]</option>
+            </select>
+          </div>
+          <!-- Card stats -->
+            {% with loading_id='company-lead-summary-loading', display_me='0' %}
+            <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <div class="row justify-content-between" id="company-lead-summary">
+                <div class="col-xl-3 col-md-6 col-sm-12">
+                    <div class="card card-stats shadow-custom">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Calls Made</h5>
+                            <span class="h2 font-weight-bold mb-0">[[ formatMoney(summary.total_calls, 0) ]]</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-green text-white rounded-circle shadow">
+                            <i class="ni ni-money-coins"></i>
+                            </div>
+                        </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                        <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 col-sm-12">
+                    <div class="card card-stats shadow-custom">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Calls Picked Up</h5>
+                            <span class="h2 font-weight-bold mb-0">[[ formatMoney(summary.total_calls_made, 0) ]]</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-green text-white rounded-circle shadow">
+                            <i class="ni ni-money-coins"></i>
+                            </div>
+                        </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                        <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 col-sm-12">
+                    <div class="card card-stats shadow-custom">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Calls Transferred</h5>
+                            <span class="h2 font-weight-bold mb-0">[[ formatMoney(summary.total_calls_xfer, 0) ]]</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                            <i class="ni ni-chart-bar-32"></i>
+                            </div>
+                        </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                        <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 col-sm-12">
+                    <div class="card card-stats shadow-custom">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Calls Duration</h5>
+                            <span class="h2 font-weight-bold mb-0">[[ getTimeFormat(summary.total_call_time) ]]</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                            <i class="ni ni-chart-bar-32"></i>
+                            </div>
+                        </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                        <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-custom">
+                <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                    <h3 class="mb-0">Disposition Breakdown</h3>
+                    </div>
+                </div>
+                </div>
+                <div class="table-responsive">
+                {% with loading_id='dispo-body-loading', display_me='0' %}
+                <center>{% include "loading-bars.html" %}</center>
+                {% endwith %}
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush" id="dispo-body">
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Status</th>
+                        <th scope="col">Status Description</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="disposition in dispositions">
+                        <td scope="row">[[ disposition.status ]]</td>
+                        <td scope="row">[[ dispoDescriptor(disposition.status) ]]</td>
+                        <td scope="row">[[ formatMoney(disposition.count, 0) ]]</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+      </div>
+  </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Call History</h3>
+                    </div>
+                    <div class="col d-none" style="text-align: right;">
+                        <a href="#" id="export-history" class="btn btn-primary">Export History</a>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <div id="filters" class="row col-12 d-none">
+                    <div class="col">
+                        <label for="disposition">Disposition</label>
+                        <select class="form-control" id="disposition" name="disposition">
+                            <option value="busy">busy</option>
+                            <option value="completed">completed</option>
+                            <option value="failed">failed</option>
+                            <option value="in-progress">in-progress</option>
+                            <option value="no-answer">no-answer</option>
+                            <option value="queued">queued</option>
+                            <option value="ringing">ringing</option>
+                            <option value="unactioned">unactioned</option>
+                            <option value="unreachable">unreachable</option>
+                            <option value="voicemail">voicemail</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="fromDT">Disposition</label>
+                        <input class="form-control" type="datetime">
+                    </div>
+                    <div class="col">
+                        <label for="toDT">Disposition</label>
+                        <input class="form-control" type="datetime">
+                    </div>
+                </div>
+                <div class="row justify-content-center text-center">
+                    <div class="row col-12">
+                        <div class="col-lg-2 mt-4">
+                            <label for="from-date" style="float: left;">From:</label>
+                            <input class="form-control" id="from-date" name="from-date" type="datetime-local">
+                        </div>
+                        <div class="col-lg-2 mt-4">
+                            <label for="to-date" style="float: left;">To:</label>
+                            <input class="form-control" id="to-date" name="to-date" type="datetime-local">
+                        </div>
+                        <div class="col-lg-4 mt-4">
+                            <label for="lead-status" style="float: left;">Status:</label>
+                            <select class="form-control" id="lead-status">
+                                <option value="none">- Status -</option>
+                                <option value="AA">AA - Answering Machine Auto</option>
+                                <option value="AB">AB - Busy Auto</option>
+                                <option value="ADC">ADC - Disconnected Number</option>
+                                <option value="DROP">DROP - Agent Unavailable</option>
+                                <option value="LRERR">LRERR - Local Dial Error</option>
+                                <option value="NA">NA - No Answer</option>
+                                <option value="PDROP">PDROP - Outbound Pre-Routing Drop</option>
+                                <option value="XFER">XFER - Call Transferred</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 mt-4">
+                            <label>&nbsp;</label><br>
+                            <button class="btn btn-primary" id="lead-filter-report">Search</button>
+                        </div>
+                    </div>
+                </div>
+                {% with loading_id='lead-table-loading', display_me='1' %}
+                <center>{% include "loading-bars.html" %}</center>
+                {% endwith %}
+                <br>
+                <table class="table align-items-center table-flush mt-4" id="lead-table" style="display: none;" sort-col="9" sort-style="desc" page-length="100">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Reference Number</th>
+                            <th scope="col">Last Disposition</th>
+                            <th scope="col">Interested</th>
+                            <th scope="col" class="d-none">Contact Person</th>
+                            <th scope="col">Call Details</th>
+                            <th scope="col" class="d-none">Calling Agent</th>
+                            <th scope="col">Actions</th>
+                            <th scope="col" class="d-none">DateTime</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leads-body">
+                        <tr v-for='(item, index) in leads'>
+                            <td tabindex="0">[[ item.lead_id ]]</td>
+                            <td>[[ returnDash(item.phone_number) ]]</td>
+                            <td>[[ returnDash(item.status) ]]</td>
+                            <td>
+                                <span v-if="item.status == 'XFER'" class="badge badge-success">Interested</span>
+                                <span v-else class="badge badge-danger">Not Interested</span>
+                            </td>
+                            <td class="d-none">[[ returnDash(item.First_Name) ]] [[ item.Last_Name ]]</td>
+                            <td>
+                                <p><i class="fa fa-stopwatch"></i> [[ item.length_in_sec ]] s<br>
+                                    <i class="fa fa-calendar"></i> [[ formatNiceDateTime(item.call_date_full) ]]<br></p>
+                            </td>
+                            <td class="d-none">[[ returnDash(item.agent_first_name) ]] [[ item.agent_last_name ]]</td>
+                            <td>
+                                <div class="dropdown d-inline">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                    Action / Recordings
+                                    </button>
+                                    <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 27px, 0px); top: 0px; left: 0px; will-change: transform;">
+                                        <a class="dropdown-item has-icon lead-call" v-bind:lead-id="item.lead_id" v-bind:campaign-id="item.campaign_id" v-bind:reference="item.phone_number" href="#" ><i class="fa fa-phone"></i> Call Lead</a>
+                                        <a class="dropdown-item has-icon sidebar-toggle lead-details" v-bind:lead-id="item.lead_id" v-bind:campaign-id="item.campaign_id" href="#lead-details" ><i class="fa fa-eye"></i> View Lead Info</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item has-icon" href="javascript:void(0);" onclick="deleteLead('9622f74f4c9736349370a89256c4c8b2')"><i class="fa fa-trash"></i> Delete Lead</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="d-none">[[ returnDash(formatDateTime(item.call_date_full)) ]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="lead-details">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <b class="mt-4">Basic Details</b>
+            <hr>
+            <div id="lead-details-body-loading">
+                <center>
+                    <img src="/static/img/spinner.svg"width="100px">
+                    <p>Loading Campaign...</p>
+                </center>
+            </div>
+            <div id="lead-details-body" style="display: none;">
+                <div class="row">
+                    <div class="col-6">
+                        <p>Campaign</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ details.data[0].campaign_id ]]</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Call Duration</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash(details.details.total_call_time) ]] s</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Lead ID</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ details.data[0].lead_id ]]</p>
+                    </div>
+                </div>
+                <br>
+                <b class="mt-4">Lead Data Info</b>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <p>First Name</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash( lead_details.first_name ) ]]</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <p>Last Name</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash( lead_details.last_name ) ]]</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <p>State</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash( lead_details.state ) ]]</p>
+                    </div>
+                </div>
+                <br>
+                <b class="mt-4">Call History</b>
+                <hr>
+                <div class="row" v-for="recording in details.data">
+                    <div class="col-6">
+                        <i class="fa fa-calendar"></i> [[formatNiceDateTime(recording.call_date_full)]]
+                    </div>
+                    <div class="col-3">
+                        <p>[[ recording.status ]]</p>
+                    </div>
+                    <div class="col-3">
+                        <a v-bind:href="recording.location" target="_blank"><i class="fa fa-stopwatch"></i> [[ recording.length_in_sec ]] S</a>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 50px; height: 100px;">&nbsp;</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    var init_camp = '{{campaign}}';
+</script>
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/material.js"></script>
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="static/js/vueJS/campaignsV2.js?v=1.3.11.1"></script>
+
+<!--<script src="static/js/vueJS/leadcompanysummary.js?v=1.3.11.1"></script>-->
+<script src="static/js/vueJS/companysummaryV2.js?v=1.3.11.1"></script>
+
+<!--<script src="static/js/vueJS/leadsummary.js?v=1.3.11.1"></script>-->
+<!--<script src="static/js/vueJS/leads.js?v=1.3.11.1"></script>-->
+<script src="static/js/vueJS/callhistoryV2.js?v=1.3.11.1"></script>
+{% endblock %}

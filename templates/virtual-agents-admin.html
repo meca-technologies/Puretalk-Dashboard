@@ -1,0 +1,218 @@
+{% extends "layout-admin.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Virtual Agents</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#virtual-agent-add" class="sidebar-toggle btn btn-info"><span style="font-weight: 1000;">+</span> Add New Virtual Agent</a>
+    </div>
+    <div class="col-xl-12 mt-4">
+        <div class="card" id="virtual-agent-admin-body">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Virtual Agents</h3>
+                    </div>
+                    <div class="col" style="text-align: right;">
+                        <small><a href="#" id="virtual-show-inactive" show="false">Show Inactive</a></small>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Company</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for='agent in virtualAgentsAdmin' v-if="showInactive || agent.status">
+                            <td tabindex="0">[[ agent.id ]]</td>
+                            <td>[[ agent.name ]]</td>
+                            <td>[[ agent.company_name ]]</td>
+                            <td scope="row">
+                                <span v-if="agent.status" class="badge badge-success">Active</span>
+                                <span v-else class="badge badge-danger">Inactive</span>
+                            </td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#virtual-agent-edit" class="sidebar-toggle btn btn-info btn-icon icon-left virtual-agent-edit" v-bind:agent-id="agent.id" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left virtual-agent-delete" v-bind:agent-id="agent.id" data-toggle="modal" data-target="#virtual-agent-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="virtual-agent-add">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add New Virtual Agent</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Company</small>
+                    <select class="form-control select2 select2-hidden-accessible" id="company-body" name="company-body" tabindex="-1" aria-hidden="true">
+                        <option value="">Select Company...</option>
+                        <option v-for="company in companies" v-bind:value="company.id">[[ company.name ]]</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <small>Agent Name</small>
+                    <input type="text" class="form-control" id="add-agent-name" placeholder="Agent Name"><br>
+                </div>
+                <div class="col d-none">
+                    <small>Studio Name</small>
+                    <input type="text" class="form-control" id="add-agent-studio" placeholder="Studio Name"><br>
+                </div>
+            </div>
+            <div class="row mt-4 d-none">
+                <div class="col">
+                    <small>Phone Number</small>
+                    <input type="text" class="form-control" id="add-agent-phone" placeholder="Phone Number"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Voice URL</small>
+                    <input type="text" class="form-control" id="add-agent-voice" placeholder="Voice URL"><br>
+                </div>
+            </div>
+            <div class="row mt-4 d-none">
+                <div class="col">
+                    <small>Application ID</small>
+                    <input type="text" class="form-control" id="add-agent-app" placeholder="Application ID"><br>
+                </div>
+            </div>
+            <div class="row mt-4 d-none">
+                <div class="col">
+                    <small>Transfer Number</small>
+                    <input type="text" class="form-control" id="add-agent-xfer" placeholder="Phone Number"><br>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <input type="checkbox" id="add-agent-enabled" name="add-agent-enabled" checked>
+                    <label for="add-agent-enabled"> Enabled</label>
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="add-virtual-agent" class="btn btn-success">Save Virtual Agent</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="virtual-agent-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.name ]]</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Company</small>
+                    <select class="form-control select2 select2-hidden-accessible" id="edit-company-body" v-bind:value="details.company_id" name="company-body" tabindex="-1" aria-hidden="true">
+                        <option v-for="company in companies" v-bind:value="company.id">[[ company.name ]]</option>
+                    </select>
+                    <input type="hidden" v-bind:value="details.id" id="edit-agent-id">
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <small>Agent Name</small>
+                    <input type="text" class="form-control" id="edit-agent-name" placeholder="Agent Name" v-bind:value="details.name"><br>
+                </div>
+                <div class="col d-none">
+                    <small>Studio Name</small>
+                    <input type="text" class="form-control" id="edit-agent-studio" placeholder="Studio Name" v-bind:value="details.studio_name"><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Phone Number</small>
+                    <input type="text" class="form-control" id="edit-agent-phone" placeholder="Phone Number" v-bind:value="details.phone"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Voice URL</small>
+                    <input type="text" class="form-control" id="edit-agent-voice" v-bind:value="details.voice_url" placeholder="Voice URL"><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Application ID</small>
+                    <input type="text" class="form-control" id="edit-agent-app" placeholder="Application ID" v-bind:value="details.app_id"><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Transfer Number</small>
+                    <input type="text" class="form-control" id="edit-agent-xfer" placeholder="Phone Number" v-bind:value="details.xfer"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="checkbox" id="edit-agent-enabled" name="edit-agent-enabled" :checked="details.status">
+                    <label for="edit-agent-enabled"> Enabled</label>
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-virtual-agent" class="btn btn-success">Save Virtual Agent</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="virtual-agent-delete" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-bell-55 ni-3x"></i>
+                    <h4 class="heading mt-4">Are you sure you want to delete this Virtual Agent?</h4>
+                    <p>This cannot be undone</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="agent-delete-conf" data-dismiss="modal">Yes, DELETE it</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/companies.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/virtualagentsadmin.js?v=1.3.11.1"></script>
+{% endblock %}

@@ -1,0 +1,623 @@
+{% extends "vicidial/layout.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Campaigns</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#campaign-add" class="sidebar-toggle btn btn-info"><span style="font-weight: 1000;">+</span> Add New Campaign</a>
+    </div>
+    <div class="col-xl-12 mt-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Campaigns</h3>
+                    </div>
+                </div>
+            </div>
+            {% with loading_id='campaign-body-loading', display_me='1' %}
+                <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <div class="table-responsive" id="campaign-body" style="display: none;">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Campaign ID</th>
+                            <th scope="col">Campaign Name</th>
+                            <th scope="col">Leads</th>
+                            <th scope="col">Progress</th>
+                            <th scope="col">Started On</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in campaigns">
+                            <td scope="row">[[ item.campaign_id ]]</td>
+                            <td scope="row">[[ item.campaign_name ]]</td>
+                            <td scope="row">
+                                <a v-bind:href="setLocationUrl(item.campaign_id)" class=" btn btn-primary btn-sm btn-icon icon-left" v-bind:campaign-id="item.campaign_id">View Leads</a>
+                            </td>
+                            <td scope="row">
+                                <span>Completed Leads: [[ item.extra_detail.call_count ]]/[[ item.extra_detail.lead_count ]]</span>
+                                <div class="progress mt-2" style="width: 100%;">
+                                    <div class="progress-bar" :class="item.status === 'started' ? 'bg-success':'bg-danger'" role="progressbar" v-bind:aria-valuenow="item.extra_detail.call_count" aria-valuemin="0" v-bind:aria-valuemax="item.extra_detail.lead_count" style="width: 0%;"></div>
+                                </div>
+                            </td>
+                            <td scope="row">[[ formatNiceDateTime(item.campaign_calldate) ]]</td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#campaign-edit" class="sidebar-toggle btn btn-info btn-icon icon-left campaign-edit" v-bind:campaign-id="index" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left campaign-delete" v-bind:campaign-id="index" data-toggle="modal" data-target="#campaign-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div> 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-add">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add Campaign</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign ID</small>
+                    <input type="text" class="form-control" placeholder="Campaign ID" id="addCampaignID" size="8" maxlength="8"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign Name</small>
+                    <input type="text" class="form-control" placeholder="Campaign Name" id="addCampaignName" size="40" maxlength="40"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign Description</small>
+                    <input type="text" class="form-control" placeholder="Campaign Description" id="addCampaignDescription" size="40" maxlength="255"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Minimum Hopper Level</small>
+                    <input type="number" class="form-control" placeholder="Hopper Level" id="addCampaignHopperLevel"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Number Of Lines</small>
+                    <input type="number" class="form-control" min="0" max="100" placeholder="Number Of Lines" id="addCampaignNumLines"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign Caller ID</small>
+                    <input type="text" class="form-control" size="10" minlength="10" maxlength="10" placeholder="Campaign Caller ID" id="addCampaignCID"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Caller ID Group</small>
+                    <select class="form-control select2 select2-hidden-accessible" id="caller-id-group-body" name="caller-id-group-body" style="display: none;">
+                        <option value="---DISABLED---" selected>Select Caller ID Group...</option>
+                        <option v-for="group in caller_id_groups" v-bind:value="group.cid_group_id">[[ group.cid_group_id ]]</option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Active</small>
+                    <select class="form-control" id="addCampaignActive">
+                        <option value="Y">Y</option>
+                        <option value="N">N</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row justify-content-center">
+            <a href="#" id="add-company" class="btn btn-success">Add New Campaign</a>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-add-old">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add Campaign</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign Name</small>
+                    <input type="text" class="form-control" placeholder="Campaign Name" id="addCampaignName" v-bind:value="details.name"><br>
+                </div>
+            </div>
+            <div class="row mt-4" id="form-builder">
+                <div class="col">
+                    <small>Form Layout</small>
+                    <select class="form-control" id="addCampaignForm">
+                        <option v-for="form in forms" v-bind:value="form.id">[[ form.form_name ]]</option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Auto Reference Enabled</small>
+                    <label class="switch" style="top:6px">
+                        <input type="checkbox" id="addCampaignARE">
+                        <span class="slider round"></span>
+                    </label><br>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <small>Auto Reference Prefix</small>
+                    <input type="text" class="form-control" id="addCampaignARP" placeholder="Auto Reference Prefix"><br>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <a href="#" id="add-company" class="btn btn-success">Add New Campaign</a>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.campaign_name ]]</h2>
+            <hr>
+            <div id="campaign-edit-loading" >
+                <center>
+                    <img src="/static/img/spinner.svg"width="100px">
+                    <p>Loading Campaign...</p>
+                </center>
+            </div>
+            <div id="campaign-edit-body">
+                <b class="mt-4">Campaign Details</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small>Campaign Name</small>
+                        <input type="text" class="form-control" placeholder="Campaign Name" id="campaignEditName" v-bind:value="details.campaign_name"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Dial Timeout</small>
+                        <input type="number" class="form-control" placeholder="Dial Time" id="campaignEditDialTimeout" v-bind:value="details.dial_timeout"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Hopper Level</small>
+                        <input type="number" class="form-control" min="0" max="100" placeholder="Hopper Level" id="campaignEditHopperLevel" v-bind:value="details.hopper_level"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Number Of Lines</small>
+                        <input type="number" class="form-control" min="0" max="100" placeholder="Number Of Lines" id="campaignEditNumLines" v-bind:value="details.number_of_lines"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Transfer # DID</small>
+                        <input type="text" class="form-control" size="10" minlength="10" maxlength="10" placeholder="Transfer # DID" id="campaignEditDID" v-bind:value="details.xferconf_a_dtmf"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Campaign Caller ID</small>
+                        <input type="text" class="form-control" size="10" minlength="10" maxlength="10" placeholder="Campaign Caller ID" id="campaignEditCID" v-bind:value="details.campaign_cid"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Caller ID Group</small>
+                        <select class="form-control" id="campaignEditCallerIDGroup" name="campaignEditCallerIDGroup">
+                            <option value="---DISABLED---" selected>Select Caller ID Group...</option>
+                            <option v-for="group in caller_id_groups" v-bind:value="group.cid_group_id" :selected="group.cid_group_id == details.cid_group_id">[[ group.cid_group_id ]]</option>
+                        </select><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Active</small>
+                        <select class="form-control" id="campaignEditActive">
+                            <option value="Y" :selected="details.active == 'Y'">Y</option>
+                            <option value="N" :selected="details.active == 'N'">N</option>
+                        </select><br>
+                    </div>
+                </div>
+                <b class="mt-4">Campaign Lists</b>
+                <table class="table mt-4">
+                    <thead>
+                        <th>List Name</th>
+                        <th>Lead Count</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="list in lists">
+                            <td>[[ list.list_name ]]</td>
+                            <td>[[ list.tally ]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-company" class="btn btn-success">Save Campaign</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-edit-old">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.name ]]</h2>
+            <hr>
+            <div id="campaign-edit-loading" >
+                <center>
+                    <img src="/static/img/spinner.svg"width="100px">
+                    <p>Loading Campaign...</p>
+                </center>
+            </div>
+            <div id="campaign-edit-body">
+                <b class="mt-4">Campaign Details</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small>Campaign Name</small>
+                        <input type="text" class="form-control" placeholder="Campaign Name" id="campaignEditName" v-bind:value="details.name"><br>
+                    </div>
+                </div>
+                
+                <div class="row d-none">
+                    <div class="col-12">
+                        <small>Campaign Members</small>
+                    </div>
+                    <div class="col-6" v-for="user in details.user_data">
+                        <small><b>[[ user.first_name ]] [[ user.last_name ]]</b></small>
+                        <input type="checkbox" class="campaignEditUser" v-bind:user-id="user.id" checked><br>
+                    </div><br>
+                </div>
+                <div class="row mt-4 d-none">
+                    <div class="col">
+                        <small>Auto Reference Enabled</small>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="campaignEditAutoRef" :checked="details.auto_reference === 1">
+                            <span class="slider round"></span>
+                        </label><br>
+                    </div>
+                </div>
+                <div class="row mt-4 d-none">
+                    <div class="col">
+                        <small>Auto Reference Prefix</small>
+                        <input type="text" id="campaignEditAutoPre" class="form-control" placeholder="Auto Reference Prefix" v-bind:value="details.auto_reference_prefix"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Transfer Phone #</small>
+                        <input type="text" id="campaignEditDID" class="form-control" placeholder="Transfer Phone #" v-bind:value="details.did"><br>
+                    </div>
+                </div><br>
+                <b class="mt-4">Virtual Agent</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small class="d-none">Company</small>
+                        <select class="form-control select2 select2-hidden-accessible" id="virtual-agent-body" name="virtual-agent-body" v-bind:value="details.virtual_agent_id" tabindex="-1" aria-hidden="true">
+                            <option value="None">Select Virtual Agent...</option>
+                            <option v-for="agent in virtualAgents" v-bind:value="agent.id">[[ agent.name ]]</option>
+                        </select>
+                    </div>
+                </div><br>
+                <b class="mt-4">Call Volume</b>
+                <hr>
+                <div class="row tab-group">
+                    <a class="col btn btn-primary tab-btn agent-type active" id="tab1" tab="tab1-group" href="#">Flat Call Maximum</a>
+                    <a class="col btn btn-primary agent-type tab-btn" id="tab2" tab="tab2-group" href="#">Based On Available Agents</a>
+                </div>
+                <div class="row mt-4">
+                    <div id="tab1-group" class="tab col-12">
+                        <small>Call amount</small>
+                        <input type="number" min="1" v-bind:value="getFlatCall(details.num_agents, details.calls_per_agent)" class="form-control" id="total-calls">
+                        <input type="hidden" value="1" class="form-control">
+                    </div>
+                    <div id="tab2-group" class="tab col-12" style="display: none;">
+                        <small># of agents</small>
+                        <input type="number" min="1" v-bind:value="details.num_agents" class="form-control" id="num-agent"><br>
+                        <small class="mt-4">Calls Per Agents</small>
+                        <input type="number" min="1" v-bind:value="details.calls_per_agent" class="form-control" id="calls-per-agent">
+                    </div>
+                </div><br>
+                <b class="mt-4">Schedule</b>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Sunday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="sundayEnabled" class="dayEnabled" :checked="details.schedules.sunday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="sundayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="sundayGroup1" v-bind:value="convertNiceTime(details.schedules.sunday.start.time_full)" class="form-control timer" day-value="sunday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="sundayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="sundayGroup2" v-bind:value="convertNiceTime(details.schedules.sunday.stop.time_full)" class="form-control timer" day-value="sunday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Monday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="mondayEnabled"  class="dayEnabled" :checked="details.schedules.monday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="mondayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="mondayGroup1" v-bind:value="convertNiceTime(details.schedules.monday.start.time_full)" class="form-control timer" day-value="monday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="mondayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="mondayGroup2" v-bind:value="convertNiceTime(details.schedules.monday.stop.time_full)" class="form-control timer" day-value="monday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Tuesday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="tuesdayEnabled"  class="dayEnabled" :checked="details.schedules.tuesday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="mondayGroup"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="tuesdayGroup1" v-bind:value="convertNiceTime(details.schedules.tuesday.start.time_full)" class="form-control timer" day-value="tuesday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="tuesdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="tuesdayGroup2" v-bind:value="convertNiceTime(details.schedules.sunday.stop.time_full)" class="form-control timer" day-value="tuesday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Wednesday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="wednesdayEnabled"  class="dayEnabled" :checked="details.schedules.wednesday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="wednesdayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="wednesdayGroup1" v-bind:value="convertNiceTime(details.schedules.wednesday.start.time_full)" class="form-control timer" day-value="wednesday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="wednesdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="wednesdayGroup2" v-bind:value="convertNiceTime(details.schedules.wednesday.stop.time_full)" class="form-control timer" day-value="wednesday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Thursday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="thursdayEnabled"  class="dayEnabled" :checked="details.schedules.thursday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="thursdayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="thursdayGroup1" v-bind:value="convertNiceTime(details.schedules.thursday.start.time_full)" class="form-control timer" day-value="thursday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="thursdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="thursdayGroup2" v-bind:value="convertNiceTime(details.schedules.thursday.stop.time_full)" class="form-control timer" day-value="thursday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Friday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="fridayEnabled"  class="dayEnabled" :checked="details.schedules.friday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="fridayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="fridayGroup1" v-bind:value="convertNiceTime(details.schedules.friday.start.time_full)" class="form-control timer" day-value="friday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="fridayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="fridayGroup2" v-bind:value="convertNiceTime(details.schedules.friday.stop.time_full)" class="form-control timer" day-value="friday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <b>Saturday</b>
+                        <label class="switch" style="top:6px">
+                            <input type="checkbox" id="saturdayEnabled"  class="dayEnabled" :checked="details.schedules.saturday.enabled === true">
+                            <span class="slider slider-success round"></span>
+                        </label><br>
+                    </div>
+                    <div class="col form-group">
+                        <label for="saturdayGroup1"><small>Start</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="saturdayGroup1" v-bind:value="convertNiceTime(details.schedules.saturday.start.time_full)" class="form-control timer" day-value="saturday" day-status="start" />
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col form-group">
+                        <label for="saturdayGroup2"><small>Stop</small></label>
+                        <div class='input-group date datetimepicker'>
+                            <input type='text' id="saturdayGroup2" v-bind:value="convertNiceTime(details.schedules.saturday.stop.time_full)" class="form-control timer" day-value="saturday" day-status="stop"/>
+                            <span class="input-group-addon input-group-append">
+                                <button class="btn btn-outline-primary" type="button" id="button-addon2">  <span class="fa fa-clock"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <small>Whitelist</small>
+                    </div>
+                    <div class="col-12">
+                        <input class="form-control" id="campaign-white-url" v-bind:value="details.white_url" type="text">
+                    </div>
+                    <div class="col-12">
+                        <small>Campaign Token</small>
+                    </div>
+                    <div class="col-9">
+                        <input class="form-control" id="campaign-token" v-bind:value="details.id" type="password">
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-primary copy-btn" data-target="campaign-token" ><i class="fa fa-copy"aria-hidden="true"></i></button>
+                        <span class="bg-danger text-white p-2 rounded" id="campaign-token-copied" style="position: relative; top: 15px; left: -4px; display: none;">Copied!</span>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-company" class="btn btn-success">Save Campaign</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="campaign-delete" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-bell-55 ni-3x"></i>
+                    <h4 class="heading mt-4">Are you sure you want to delete this campaign?</h4>
+                    <p>This cannot be undone</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="campaign-delete-conf" data-dismiss="modal">Yes, DELETE it</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/moment.min.js"></script>
+<script src="/static/vendor/bootstrap-datetimepicker.js"></script>
+<script src="static/js/vueJS/campaignsV2.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/users.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/formbuilder.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/calleridsV2.js?v=1.3.11.1"></script>
+
+<script>
+    $('body').on('click','.tab-btn', function(){
+        var tabID = $(this).attr("tab");
+        console.log(tabID);
+
+        var tabs = $(".tab");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            tabs[i].style.display = 'none';
+        }
+
+        var tabs = $(".tab-btn");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            $(tabs[i]).removeClass('active');
+        }
+
+        $(this).addClass('active');
+        document.getElementById(tabID).style.display = '';
+    });
+</script>
+{% endblock %}

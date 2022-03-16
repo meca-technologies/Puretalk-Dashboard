@@ -1,0 +1,209 @@
+{% extends "layout-admin.html" %}
+{% block headScripts%}
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+<style>
+    #chartdiv {
+      width: 100%;
+      height: 500px;
+    }
+    #chartdiv2 {
+      width: 100%;
+      height: 500px;
+    }
+</style>
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <h5 class="h2 text-white d-inline-block mb-0">Twilio Billing Summary</h5>
+            <div class="row align-items-center py-4" id="twilio-summary-filters">
+                <div class="col-lg-6 col-sm-12">
+                    <h5 class="h2 text-white d-inline-block mb-0">Time Frame</h5>
+                    <select class="form-control form-control-alternative" id="twilio-summary-select">
+                        <option selected disabled>Select Time Frame</option>
+                        <option value="this_month">This Month</option>
+                        <option value="last_month">Last Month</option>
+                        <option value="today">Today</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-sm-12">
+                    <h5 class="h2 text-white d-inline-block mb-0">Company</h5>
+                    <select class="form-control form-control-alternative" id="twilio-company-select">
+                        <option value="all" selected>All Companies</option>
+                        {% for company in companies %}
+                        <option value="{{ company.id }}">{{ company.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-3 col-sm-12">
+                    <h5 class="h2 text-white d-inline-block mb-0">&nbsp;</h5>
+                    <a href="#" class="btn btn-info mt-4" id="twilio-filter">Search</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<!-- Header -->
+<div class="col-xl-12" id="twilio-summary-billing-loading" style="display: none;">
+    <center>
+        <img src="/static/img/spinner.svg" width="100px">
+        <h2>Grabbing Companies [[ current ]]/[[ max ]]</h2>
+    </center>
+</div>
+<div class="container-fluid mt--6" id="twilio-summary-body" style="display: none;">
+    <div class="row">
+        <div class="col-lg-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="col">
+                        <h3 class="mb-0">Company Breakdown</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="chartdiv"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="col">
+                        <h3 class="mb-0">Cost Breakdown</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="chartdiv2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-12 mt-4">
+            <div class="card">
+                <div class="card-header border-0">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0">Company Summary Details</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="twilio-summary-billing">
+                    <table class="col-12 table">
+                        <thead>
+                            <th width="60%"></th>
+                            <th width="20%"></th>
+                            <th width="20%"></th>
+                            <th width="20%">Total Cost: $[[ formatMoney(total_cost, 4) ]]</th>
+                        </thead>
+                    </table>
+                    <table class="col-12 table table-striped" v-for="(key, value) in companies" class="mt-4" tab-group="twilio-groups" v-bind:tab-target="key.details.company_id">
+                        <thead class="bg-default text-white pointer">
+                            <th width="60%" style="vertical-align: top;"><h3 class="text-white">[[ key.details.company_name ]]</h3></th>
+                            <th width="20%" style="text-align: right; vertical-align: top;"><h3 class="text-white">Units</h3></th>
+                            <th width="20%" style="text-align: right; vertical-align: top;"><h3 class="text-white">Quantity</h3></th>
+                            <th width="20%" style="text-align: right; vertical-align: top;">
+                                <h3 class="text-white">Cost</h3>
+                                <h4 class="text-white">$[[ formatMoney(key.details.total_cost, 4) ]]</h4>
+                            </th>
+                        </thead>
+                        <tbody class="setting-tab" tab-parent="twilio-groups" v-bind:id="key.details.company_id">
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h4 class="ml-3">Programmable Voice</h4></td>
+                                <td width="20%" style="text-align: right;">-</td>
+                                <td width="20%" style="text-align: right;">-</td>
+                                <td width="20%" style="text-align: right;">-</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Speech Recogonition</h5></td>
+                                <td width="20%" style="text-align: right;">15 sec interval</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Speech_Recognition.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Speech_Recognition.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Twilio Client Minutes</h5></td>
+                                <td width="20%" style="text-align: right;">minutes</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Twilio_Client_Minutes.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Twilio_Client_Minutes.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Recordings</h5></td>
+                                <td width="20%" style="text-align: right;">recorded-minutes</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Recordings.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Recordings.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Amazon Polly Characters</h5></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Progammable_Voice.Amazon_Polly_Characters.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Amazon_Polly_Characters.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Amazon_Polly_Characters.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Conference Minutes</h5></td>
+                                <td width="20%" style="text-align: right;">minutes</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Conference_Minutes.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Conference_Minutes.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Voice Minutes</h5></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.price + key.billing.Progammable_Voice.Voice_Minutes.Outbound_Voice_Minutes.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-6">Inbound Voice Minutes</h5></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-7">Inbound Local Calls</h5></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Inbound_Voice_Minutes.Inbound_Local_Calls.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-6">Outbound Voice Minutes</h5></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Progammable_Voice.Voice_Minutes.Outbound_Voice_Minutes.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Outbound_Voice_Minutes.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Progammable_Voice.Voice_Minutes.Outbound_Voice_Minutes.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h4 class="ml-3">Phone Numbers</h4></td>
+                                <td width="20%" style="text-align: right;">-</td>
+                                <td width="20%" style="text-align: right;">-</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Phone Numbers</h4></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-6">Local PhoneNumbers</h5></td>
+                                <td width="20%" style="text-align: right;">[[ key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.count_unit]]</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Phone_Numbers.Phone_Numbers.Local_PhoneNumbers.price, 4) ]]</td>
+                            </tr>
+                            <tr class="p-2 mt-2">
+                                <td width="60%"><h5 class="ml-5">Answering Machine Detection</h4></td>
+                                <td width="20%" style="text-align: right;">recognitions</td>
+                                <td width="20%" style="text-align: right;">[[ formatMoney(key.billing.Answering_Machine_Detection.count, 0) ]]</td>
+                                <td width="20%" style="text-align: right;">$[[ formatMoney(key.billing.Answering_Machine_Detection.price, 4) ]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/tabs.js?v=1.3.10.1.7"></script>
+<script src="static/js/vueJS/twilio-billing-breakdown.js?v=1.3.9.8"></script>
+{% endblock %}

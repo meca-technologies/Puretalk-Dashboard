@@ -1,0 +1,269 @@
+{% extends "layout-admin.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Subscription Plans</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Subscription Plans</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Monthly Price ($)</th>
+                            <th scope="col">Annual Price ($)</th>
+                            <th scope="col">Users</th>
+                            <th scope="col">Storage</th>
+                            <th scope="col">Modules</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plan-body">
+                        <tr v-for="plan in subscriptionPlans">
+                            <td scope="row">[[ plan.id ]]</td>
+                            <td>[[ plan.name ]]</td>
+                            <td>$[[ formatMoney(plan.monthly_price) ]]</td>
+                            <td>$[[ formatMoney(plan.annual_price) ]]</td>
+                            <td>[[ plan.max_employees ]]</td>
+                            <td>[[ plan.max_storage_size ]]</td>
+                            <td>
+                                <ul>
+                                    <li v-for="(value, name) in plan.modules">[[ value ]]</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#plan-edit" class="sidebar-toggle btn btn-info btn-icon icon-left plan-edit" data-toggle="tooltip" data-original-title="Edit" v-bind:sub-id="plan.id"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button onclick="deleteModal(1)" class="btn btn-danger btn-icon icon-left" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="plan-new">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add New Subscription</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Subscription Name</small>
+                    <input type="text" class="form-control" placeholder="Subscription Name"><br>
+                </div>
+                <div class="col">
+                    <small>Max Employees</small>
+                    <input type="text" class="form-control" placeholder="Max Employees"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Max Storage Size</small>
+                    <input type="text" class="form-control" placeholder="Max Storage Size"><br>
+                </div>
+                <div class="col">
+                    <small>Storage Unit</small>
+                    <input type="text" class="form-control" placeholder="Storage Unit"><br>
+                </div>
+            </div>
+            <b class="mt-4">Payment Gateway Plans</b><br>
+            <div class="row mt-2">
+                <div class="col">
+                    <small>Monthly Price</small>
+                    <input type="text" class="form-control" placeholder="Monthly Price"><br>
+                </div>
+                <div class="col">
+                    <small>Annual Price</small>
+                    <input type="text" class="form-control" placeholder="Annual Price"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Stripe Monthly Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Stripe Monthly Plan ID"><br>
+                </div>
+                <div class="col">
+                    <small>Stripe Annual Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Stripe Annual Plan ID"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Razorpay Monthly Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Razorpay Monthly Plan ID"><br>
+                </div>
+                <div class="col">
+                    <small>Razorpay Annual Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Razorpay Annual Plan ID"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Paystack Monthly Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Paystack Monthly Plan ID"><br>
+                </div>
+                <div class="col">
+                    <small>Paystack Annual Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Paystack Annual Plan ID"><br>
+                </div>
+            </div>
+            <b class="mt-4">Select Modules</b><br>
+            <div class="row mt-2">
+                <div class="col-6">
+                    <input type="checkbox" name="sales-members" id="sales-members">
+                    <label>Sales Members</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="import-leads" id="import-leads">
+                    <label>Import Leads</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="export-leads" id="export-leads">
+                    <label>Export Leads</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="email-templates" id="email-templates">
+                    <label>Email Templates</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="follow-up-calls" id="follow-up-calls">
+                    <label>Follow Up Calls</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="follow-up-calls" id="follow-up-calls">
+                    <label>Appointments</label>
+                </div>
+            </div>
+            <small class="mt-2">Description</small>
+            <textarea class="form-control" placeholder="Description"></textarea>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="plan-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.name ]]</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Subscription Name</small>
+                    <input type="text" class="form-control" placeholder="Subscription Name" v-bind:value="details.name"><br>
+                </div>
+                <div class="col">
+                    <small>Max Employees</small>
+                    <input type="text" class="form-control" placeholder="Max Employees" v-bind:value="details.max_employees"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Max Storage Size</small>
+                    <input type="text" class="form-control" placeholder="Max Storage Size" v-bind:value="details.max_storage_size"><br>
+                </div>
+                <div class="col">
+                    <small>Storage Unit</small>
+                    <input type="text" class="form-control" placeholder="Storage Unit" v-bind:value="details.storage_unit"><br>
+                </div>
+            </div>
+            <b class="mt-4">Payment Gateway Plans</b><br>
+            <div class="row mt-2">
+                <div class="col">
+                    <small>Monthly Price</small>
+                    <input type="text" class="form-control" placeholder="Monthly Price" v-bind:value="details.monthly_price"><br>
+                </div>
+                <div class="col">
+                    <small>Annual Price</small>
+                    <input type="text" class="form-control" placeholder="Annual Price" v-bind:value="details.annual_price"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Stripe Monthly Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Stripe Monthly Plan ID" v-bind:value="details.stripe_monthly_plan_id"><br>
+                </div>
+                <div class="col">
+                    <small>Stripe Annual Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Stripe Annual Plan ID" v-bind:value="details.stripe_annual_plan_id"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Razorpay Monthly Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Razorpay Monthly Plan ID" v-bind:value="details.razorpay_monthly_plan_id"><br>
+                </div>
+                <div class="col">
+                    <small>Razorpay Annual Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Razorpay Annual Plan ID" v-bind:value="details.razorpay_annual_plan_id"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Paystack Monthly Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Paystack Monthly Plan ID" v-bind:value="details.paystack_monthly_plan_id"><br>
+                </div>
+                <div class="col">
+                    <small>Paystack Annual Plan ID</small>
+                    <input type="text" class="form-control" placeholder="Paystack Annual Plan ID" v-bind:value="details.paystack_annual_plan_id"><br>
+                </div>
+            </div>
+            <b class="mt-4">Select Modules</b><br>
+            <div class="row mt-2">
+                <div class="col-6">
+                    <input type="checkbox" name="sales-members" id="sales-members" :checked="details.modules.sales_members">
+                    <label>Sales Members</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="import-leads" id="import-leads" :checked="details.modules.import_leads">
+                    <label>Import Leads</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="export-leads" id="export-leads" :checked="details.modules.export_leads">
+                    <label>Export Leads</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="email-templates" id="email-templates" :checked="details.modules.email_templates">
+                    <label>Email Templates</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="follow-up-calls" id="follow-up-calls" :checked="details.modules.follow_up_call">
+                    <label>Follow Up Calls</label>
+                </div>
+                <div class="col-6">
+                    <input type="checkbox" name="follow-up-calls" id="follow-up-calls" :checked="details.modules.appointments">
+                    <label>Appointments</label>
+                </div>
+            </div>
+            <small class="mt-2">Description</small>
+            <textarea class="form-control" placeholder="Description" v-bind:value="details.description"></textarea>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/subscriptionplans.js?v=1.3.11.1"></script>
+{% endblock %}

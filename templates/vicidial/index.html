@@ -1,0 +1,573 @@
+{% extends "vicidial/layout.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+{% endblock %}
+{% block body %}
+  <style>
+    .sidebar-modal{
+      background-color: rgba(0, 0, 0, 0.5);
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0px;
+      z-index: 99999;
+      display: none;
+    }
+    .sidebar-modal:hover{
+      cursor: pointer;
+    }
+    .sidebar-content{
+      position: fixed;
+      top: 0;
+      right: -450px;
+      height: 100vh;
+      width: 450px;
+      max-width: 90vw;
+      z-index: 999999;
+      overflow-y: scroll;
+    }
+    .sidebar-content:hover{
+      cursor: auto;
+    }
+    #chartdiv, #chartdiv-live {
+      width: 100%;
+      height: 500px;
+      background-color: #172b4d !important;
+    }
+    tspan{
+      fill: white !important;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .amcharts-Grid-group{
+        fill-opacity: 1 !important;
+        fill: white !important;
+    }
+    .amcharts-Circle {
+        fill: #5e72e4 !important;
+    }
+    .amcharts-Sprite-group.amcharts-RoundedRectangle-group{
+        fill-opacity: .1;
+    }
+    .amcharts-Container.amcharts-Scrollbar.amcharts-XYChartScrollbar > .amcharts-Sprite-group{
+        fill-opacity: .3;
+    }
+
+    .shadow-custom{
+      box-shadow: 0px 5px 9px 0px rgba(0,0,0,0.12);
+    }
+    @media (max-width: 576px)
+    {
+      #lead-summary{
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0;
+      }
+    }
+  </style>
+  <!-- Header -->
+  <!-- Header -->
+  <div class="header bg-primary pb-6">
+    <div class="container-fluid">
+      <div class="header-body">
+        <div class="row align-items-center py-4">
+          <div class="col-lg-6 col-7">
+            <h6 class="h2 text-white d-inline-block mb-0">Dashboard</h6>
+          </div>
+        </div>
+        <!-- Card stats -->
+        {% with loading_id='company-lead-summary-loading', display_me='1' %}
+        <center>{% include "loading-bars.html" %}</center>
+        {% endwith %}
+        <div class="row justify-content-between" id="company-lead-summary" style="display: none;">
+          <div class="col-xl-3-5 col-md-6 col-sm-12">
+            <div class="card card-stats shadow-custom">
+              <!-- Card body -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Campaigns</h5>
+                    <span class="h2 font-weight-bold mb-0">[[ summary.campaign_count ]]</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-orange text-white rounded-circle shadow">
+                      <i class="ni ni-mobile-button"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <a href="/campaigns" class="font-weight-bold mb-0">View Campaigns</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3-5 col-md-6 col-sm-12">
+            <div class="card card-stats shadow-custom">
+              <!-- Card body -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Calls Made</h5>
+                    <span class="h2 font-weight-bold mb-0">[[ formatMoney(summary.total_calls, 0) ]]</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-green text-white rounded-circle shadow">
+                      <i class="ni ni-mobile-button"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3-5 col-md-6 col-sm-12">
+            <div class="card card-stats shadow-custom">
+              <!-- Card body -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Calls Picked Up</h5>
+                    <span class="h2 font-weight-bold mb-0">[[ formatMoney(summary.total_calls_made, 0) ]]</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-green text-white rounded-circle shadow">
+                      <i class="ni ni-mobile-button"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3-5 col-md-6 col-sm-12">
+            <div class="card card-stats shadow-custom">
+              <!-- Card body -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Calls Transferred</h5>
+                    <span class="h2 font-weight-bold mb-0">[[ formatMoney(summary.total_calls_xfer, 0) ]]</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                      <i class="ni ni-mobile-button"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3-5 col-md-6">
+            <div class="card card-stats shadow-custom">
+              <!-- Card body -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Calls Duration</h5>
+                    <span class="h2 font-weight-bold mb-0">[[ getTimeFormat(summary.total_call_time) ]]</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                      <i class="ni ni-mobile-button"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <a href="/leads" class="font-weight-bold mb-0">View Report</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Page content -->
+  <div class="container-fluid mt--6">
+    <div class="row">
+      <div class="col-xl-12">
+        <div class="card bg-default shadow-custom">
+          <div class="card-header bg-transparent">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
+                <h5 class="h3 text-white mb-0">Leadings</h5>
+              </div>
+              <div class="col">
+                <ul class="nav nav-pills justify-content-end">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link py-2 px-3 chartTab" id="liveTab" data-toggle="tab">
+                      <span class="d-none d-md-block">Live</span>
+                      <span class="d-md-none">L</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" onclick="getBuiltInDates('week')" class="nav-link py-2 px-3 chartTab" id="weekTabChart" data-toggle="tab">
+                      <span class="d-none d-md-block">Week</span>
+                      <span class="d-md-none">W</span>
+                    </a>
+                  </li>
+                  <li class="nav-item mr-2 mr-md-0">
+                    <a href="#" onclick="getBuiltInDates('month')" class="nav-link py-2 px-3 chartTab active" id="monthTabChart" data-toggle="tab">
+                      <span class="d-none d-md-block">Month</span>
+                      <span class="d-md-none">M</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link py-2 px-3" id="customChart" href="#chart-custom" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="chart-custom">
+                      <span class="d-none d-md-block" data-toggle="tab">Custom</span>
+                      <span class="d-md-none">C</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="collapse" id="chart-custom">
+              <div class="row justify-content-center mt-4">
+                <div class="col ml-2 text-white">
+                  <small for="fromdate">From:</small>
+                  <input type="date" id="fromdate" name="fromdate" class="form-control">
+                </div>
+                <div class="col ml-2 text-white">
+                  <small for="todate">To:</small>
+                  <input type="date" id="todate" name="todate" class="form-control">
+                </div>
+                <div class="col ml-2 text-white">
+                  <small>&nbsp;</small><br>
+                  <a href="#" onclick="updateChart()" class="btn btn-primary ml-2">Submit</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Chart -->
+              <div id="chartdiv"></div>
+              <div id="chartdiv-live" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 d-none" id="follow-up-body-loading">
+        <center><img src="/static/img/spinner.svg" id="summary-stats-loading" width="100px"></center>
+      </div>
+      <div class="col-xl-4 d-none" id="follow-up-body" style="display: none;">
+        <div class="card shadow-custom">
+          <div class="card-header border-0 bg-info">
+            <div class="row align-items-center">
+              <div class="col">
+                <h1 class="mb-0 text-white">[[ length ]]</h1>
+                <h4 class="text-white">Follow Up Calls</h4>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive" style="max-height: 374px; overflow-y: scroll;">
+            <!-- Projects table -->
+            <table class="table align-items-center table-flush">
+              <tbody>
+                <tr v-for="followUp in followUps">
+                  <td scope="row">
+                    <b>[[ followUp.campaign_name ]]</b><br>
+                    <small>[[ followUp.first_name ]] [[ followUp.last_name ]]</small>
+                  </td>
+                  <td style="text-align: right;" class="d-none">
+                    <button class="btn btn-icon btn-sm btn-primary" type="button">
+                      <span class="btn-inner--icon"><i class="ni ni-button-play"></i></span>
+                    </button>
+                    <button class="btn btn-icon btn-sm btn-success" type="button">
+                      <span class="btn-inner--icon"><i class="ni ni-archive-2"></i></span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row d-none">
+      <div class="col-xl-12">
+        <div class="card bg-default shadow-custom">
+          <div class="card-header bg-transparent">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
+                <h5 class="h3 text-white mb-0">Leadings</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Chart -->
+              <div id="chartdiv-live"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 d-none" id="follow-up-body-loading">
+        <center><img src="/static/img/spinner.svg" id="summary-stats-loading" width="100px"></center>
+      </div>
+      <div class="col-xl-4 d-none" id="follow-up-body" style="display: none;">
+        <div class="card shadow-custom">
+          <div class="card-header border-0 bg-info">
+            <div class="row align-items-center">
+              <div class="col">
+                <h1 class="mb-0 text-white">[[ length ]]</h1>
+                <h4 class="text-white">Follow Up Calls</h4>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive" style="max-height: 374px; overflow-y: scroll;">
+            <!-- Projects table -->
+            <table class="table align-items-center table-flush">
+              <tbody>
+                <tr v-for="followUp in followUps">
+                  <td scope="row">
+                    <b>[[ followUp.campaign_name ]]</b><br>
+                    <small>[[ followUp.first_name ]] [[ followUp.last_name ]]</small>
+                  </td>
+                  <td style="text-align: right;" class="d-none">
+                    <button class="btn btn-icon btn-sm btn-primary" type="button">
+                      <span class="btn-inner--icon"><i class="ni ni-button-play"></i></span>
+                    </button>
+                    <button class="btn btn-icon btn-sm btn-success" type="button">
+                      <span class="btn-inner--icon"><i class="ni ni-archive-2"></i></span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xl-6">
+        <div class="card shadow-custom">
+          <div class="card-header border-0">
+            <div class="row align-items-center">
+              <div class="col">
+                <h3 class="mb-0">Disposition Breakdown</h3>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive">            
+          {% with loading_id='dispo-body-loading', display_me='1' %}
+          <center>{% include "loading-bars.html" %}</center>
+          {% endwith %}
+            <!-- Projects table -->
+            <table class="table align-items-center table-flush" id="dispo-body" style="display: none;">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Status</th>
+                  <th scope="col">Status Description</th>
+                  <th scope="col">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="disposition in dispositions">
+                  <td scope="row">[[ disposition.status ]]</td>
+                  <td scope="row">[[ dispoDescriptor(disposition.status) ]]</td>
+                  <td scope="row">[[ formatMoney(disposition.count, 0) ]]</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-6">
+        <div class="card shadow-custom">
+          <div class="card-header border-0">
+            <div class="row align-items-center">
+              <div class="col">
+                <h3 class="mb-0">Interest Breakdown</h3>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive" style="max-height: 400px; overflow-y: scroll;">
+            <!-- Projects table -->
+            {% with loading_id='campaign-breakdown-loading', display_me='1' %}
+            <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <table class="table align-items-center table-flush" id="campaign-breakdown" style="display: none;">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Campaign</th>
+                  <th scope="col">Leads</th>
+                  <th scope="col">Interested/Uninterested</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="interest in interests">
+                  <th scope="row">[[ interest.campaign_id ]]</th>
+                  <td>[[ formatMoney(interest.total, 0) ]]</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <span class="mr-2">[[ formatMoney(interest.interested/(interest.total-interest.interested)*100) ]]%</span>
+                      <div>
+                        <span>Interested</span>
+                        <div class="progress">
+                          <div class="progress-bar bg-success" role="progressbar" v-bind:aria-valuenow="interest.interested" aria-valuemin="0" v-bind:aria-valuemax="interest.total" style="width: 0%;"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mt-2">
+                      <span class="mr-2">[[ formatMoney(100-(interest.interested/(interest.total-interest.interested)*100)) ]]%</span>
+                      <div>
+                        <span>Uninterested</span>
+                        <div class="progress">
+                          <div class="progress-bar bg-danger" role="progressbar" v-bind:aria-valuenow="interest.total-interest.interested" aria-valuemin="0" v-bind:aria-valuemax="interest.total" style="width: 0%;"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card shadow-custom">
+          <div class="card-header border-0">
+            <div class="row align-items-center">
+              <div class="col">
+                <h3 class="mb-0">Cost Breakdown</h3>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive" style="max-height: 400px; overflow-y: scroll;">
+            <!-- Projects table -->
+            {% with loading_id='campaign-billing-breakdown-loading', display_me='1' %}
+            <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <table class="table align-items-center table-flush" id="campaign-billing-breakdown" style="display: none;">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Campaign</th>
+                  <th scope="col">Rounded Minutes</th>
+                  <th scope="col">Total Charge</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="breakdown in campaign_minute_breakdown">
+                  <td scope="row">[[ breakdown.campaign_id ]]</td>
+                  <td>[[ formatMoney(breakdown.rounded_minutes, 0) ]]</td>
+                  <td class="text-danger"><b>$[[ formatMoney(breakdown.total_charge) ]]</b></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% with loading_id='call-manager-body-loading', display_me='1' %}
+    <center>{% include "loading-bars.html" %}</center>
+    {% endwith %}
+    <div class="row" id="call-manager-body" style="display: none;">
+      <div class="col-xl-4" v-for="campaign in campaigns" v-if="campaign.extra_detail.remaining_leads != -1 && campaign.active == 'Y'">
+          <div class="card border-top border-success">
+              <div class="card-header border-0">
+              <div class="row align-items-center">
+                <div class="col-7">
+                <h3 class="mb-0">[[ campaign.campaign_name ]]
+                    <div v-if="campaign.extra_detail.remaining_leads > 0 || campaign.extra_detail.lead_count == 0">
+                      <span class="text-success" v-if="campaign.extra_detail.status === 'RUNNING'">(RUNNING)</span>
+                      <span class="text-danger" v-else-if="campaign.extra_detail.status === 'STOPPED'">(STOPPED)</span>
+                      <span class="text-success" v-else-if="campaign.extra_detail.status === 'completed'">(COMPLETED)</span>
+                      <span class="text-danger" v-else>(NOT STARTED)</span>
+                    </div>
+                    <div v-else-if = "campaign.extra_detail.status !== null">
+                      <span class="text-success">(COMPLETED)</span>
+                    </div>
+                    <div v-else>
+                      <span class="text-danger">(NOT STARTED)</span>
+                    </div>
+                </h3>
+                </div>
+                <div class="col-5" style="text-align: right;">
+                  <a v-bind:href="setLocationUrl(campaign.campaign_id)" class="btn btn-primary btn-sm" v-bind:campaign-id="campaign.campaign_id">View Dispositions</a>
+                <small><b>Started:</b> [[ formatNiceDate(campaign.campaign_calldate) ]]</small>
+                </div>
+            </div>
+            <div class="row align-items-center mt-4">
+                <div class="col border-top border-bottom text-center">
+                <small><b>Remaining</b></small>
+                <p><b>[[ formatMoney(campaign.extra_detail.remaining_leads, 0) ]]</b></p>
+                </div>
+                <div class="col border text-center">
+                <small><b>Completed</b></small>
+                <p><b>[[ formatMoney(campaign.extra_detail.call_count, 0) ]]</b></p>
+                </div>
+                <div class="col border-top border-bottom text-center">
+                <small><b>Total</b></small>
+                <p><b>[[ formatMoney(campaign.extra_detail.lead_count, 0) ]]</b></p>
+                </div>
+            </div>
+            <div class="row align-items-center mt-4">
+                <span>Completed Leads: [[ formatMoney(campaign.extra_detail.call_count, 0) ]]/[[ formatMoney(campaign.extra_detail.lead_count, 0) ]]</span>
+                <div class="progress mt-2" style="width: 100%;">
+                <div class="progress-bar" :class="campaign.extra_detail.status === 'started' ? 'bg-success':'bg-danger'" role="progressbar" v-bind:aria-valuenow="campaign.extra_detail.call_count" aria-valuemin="0" v-bind:aria-valuemax="campaign.extra_detail.lead_count" style="width: 0%;"></div>
+                </div>
+            </div>
+              <div class="row align-items-center mt-4 p-2 text-white d-none">
+                <div class="p-2 col ml-2" :class="campaign.status === 'started' ? 'bg-success':'bg-danger'">
+                  <p>Transfers Today</p>
+                  <p>0</p>
+                </div>
+                <div class="p-2 col ml-2" :class="campaign.status === 'started' ? 'bg-success':'bg-danger'">
+                  <p>This Hour</p>
+                  <p>0</p>
+                </div>
+                <div class="p-2 col ml-2" :class="campaign.status === 'started' ? 'bg-success':'bg-danger'">
+                  <p>Remaining Today</p>
+                  <p>0</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer"></div>
+          </div>
+      </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+
+<script src="static/js/apiJS/getLeadCountsV2.js?v=1.3.11.1"></script>
+<script src="static/js/apiJS/getLiveLeadCounts.js?v=1.3.11.1"></script>
+
+<!--<script src="static/js/vueJS/timecontroller.js?v=1.3.11.1"></script>-->
+
+<script src="static/js/vueJS/companysummaryV2.js?v=1.3.11.1"></script>
+
+<script>
+  var d = new Date();
+  var formatted_today = formatDate(d);
+  
+  updateSummary(formatted_today);
+  
+  setInterval(function(){
+      updateSummary(formatted_today);
+  }, 40000)
+</script>
+
+<!--<script src="static/js/vueJS/followups.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/appointments.js?v=1.3.11.1"></script>-->
+
+<script src="static/js/vueJS/callmanagerV2.js?v=1.3.11.1"></script>
+<!--<script src="static/js/vueJS/campaigncounts.js?v=1.3.11.1"></script>-->
+{% endblock %}

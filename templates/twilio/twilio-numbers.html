@@ -1,0 +1,168 @@
+{% extends "twilio/layout.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Phone Number</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#phone-number-add" class="btn btn-info" data-toggle="modal" data-target="#phone-number-add"><span style="font-weight: 1000;">+</span> Add Phone Number</a>
+    </div>
+    <div class="col-xl-12" id="phone-numbers-loading">
+        <center><img src="/static/img/spinner.svg" id="forms-loading" width="100px"></center>
+    </div>
+    <div class="col-xl-12 mt-4" id="phone-numbers" style="display: none;">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Phone Number</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col">Friendly Name</th>
+                            <th scope="col">Created At</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="number in available_numbers">
+                            <td scope="row">[[ number.id ]]</td>
+                            <td scope="row">[[ number.phone_number ]]</td>
+                            <td scope="row">[[ returnDash(number.friendly_name) ]]</td>
+                            <td scope="row">[[ number.created_at ]]</td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#phone-number-edit" class="sidebar-toggle btn btn-info btn-icon icon-left phone-number-edit" v-bind:phone-id="number.id" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left phone-number-delete" v-bind:phone-id="number.id" v-bind:phone-sid="number.phone_sid" data-toggle="modal" data-target="#phone-number-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div> 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="phone-number-add" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal modal-default modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification"></h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center" id="phone-number-add-body" style="display: none;">
+                    <i class="ni ni-mobile-button ni-3x"></i>
+                    <p>Purchasing a phone number will cost an extra $1 a month</p>
+                    <div class="row" style="text-align: left;">
+                        <div class="col-9">
+                            <input class="form-control" id="area-code-filter" type="text" placeholder="Area Code">
+                        </div>
+                        <div class="col-3">
+                            <a href="#" class="btn btn-success" id="purchase-filter">Filter</a>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="custom-scrollbar-success row" style="max-height: 400px; overflow-y: scroll; overflow-x: hidden;">
+                        <div class="row mt-4 col-12" v-for="number in purchasable_numbers">
+                            <div class="col-9" style="text-align: left;">
+                                [[ number.phone_number ]]
+                            </div>
+                            <div class="col-3">
+                                <a href="#" class="btn btn-success purchase-number" v-bind:phone="number.phone_number">Purchase</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-12" id="phone-number-add-loading">
+                    <center><img src="/static/img/spinner.svg" id="forms-loading" width="100px"></center>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="phone-number-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.friendly_name ]]</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Phone Number</small>
+                    <input type="text" class="form-control" placeholder="Phone Number" v-bind:value="details.phone_number" disabled><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Friendly Name</small>
+                    <input type="text" class="form-control" id="edit-phone-name" placeholder="Friendly Name" v-bind:value="details.friendly_name"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Virtual Agent (INBOUND)</small>
+                    <select class="form-control" id="edit-virtual-agent">
+                        <option>Select a virtual agent</option>
+                        <option v-for='agent in virtual_agents' v-bind:value="agent.id" :selected="details.virtual_agent_id == agent.id">[[agent.name]]</option>
+                    </select><br>
+                </div>
+            </div>
+            <input type="hidden" class="form-control" id="edit-phone-id" v-bind:value="details.id">
+            <input type="hidden" class="form-control" id="edit-phone-sid" v-bind:value="details.phone_sid">
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-phone-number" class="btn btn-success">Save Phone Number</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="phone-number-delete" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-bell-55 ni-3x"></i>
+                    <h4 class="heading mt-4">Are you sure you want to delete this phone number?</h4>
+                    <p>This cannot be undone</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="phone-delete-conf" data-dismiss="modal">Yes, DELETE it</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/twilionumbers.js?v=1.3.11.1"></script>
+{% endblock %}

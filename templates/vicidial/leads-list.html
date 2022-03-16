@@ -1,0 +1,189 @@
+{% extends "vicidial/layout.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Leads List</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Leads List</h3>
+                    </div>
+                </div>
+            </div>
+            {% with loading_id='list-body-loading', display_me='1' %}
+            <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <div class="col-12">
+                <select class="form-control select2 select2-hidden-accessible" id="list-body" name="list-body" style="display: none;">
+                    <option value="">Select List</option>
+                    <option v-for="list in lists" v-bind:value="list.list_id">[[ list.list_name ]]</option>
+                </select>
+            </div>
+            <div class="table-responsive mt-4">
+                <!-- Projects table -->    
+                <div id="lead-list-table-loading" style="display: none;">
+                    {% with loading_id='' %}
+                    <center>{% include "loading-bars.html" %}</center>
+                    {% endwith %}
+                </div>
+                <table class="table align-items-center table-flush" id="lead-list-table" style="display: none;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Lead ID</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Details</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Call Count</th>
+                            <th scope="col">Last Call</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for='(item, index) in lead_items'>
+                            <td tabindex="0">[[ item.lead_id ]]</td>
+                            <td>[[ item.phone_number ]]</td>
+                            <td>[[ item.first_name ]] [[ item.last_name ]]</td>
+                            <td>
+                                <ul >
+                                    <li v-if="item.email != ''"><b>Email: </b>[[ item.email ]]</li>
+                                    <li><b>Address:</b> 
+                                        <span v-if="item.address1 != ''">[[ returnDash(item.address1) ]] </span> 
+                                        <span v-if="item.address2 != ''">[[ item.address2 ]] </span> 
+                                        <span v-if="item.address3 != ''">[[ item.address3 ]] </span>
+                                        <span v-if="item.address1 != '' || item.address2 != '' || item.address3 != ''">, </span>
+                                        <span v-if="item.city != ''">[[ item.city ]], </span>
+                                        <span v-if="item.state != ''">[[ item.state ]] </span> 
+                                        <span v-if="item.postal_code != ''">[[ item.postal_code ]] </span>
+                                    </li>
+                                    <li v-if="item.gender != ''"><b>Gender: </b>[[ item.gender ]]</li>
+                                </ul>
+                            </td>
+                            <td><span class="badge badge-info">[[ item.status ]]</span></td>
+                            <td>[[ item.called_count ]]</td>
+                            <td>[[ removeString(item.last_local_call_time, '0000-00-00 00:00:00', '-') ]]</td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#lead-item-details" class="sidebar-toggle btn btn-info btn-icon icon-left lead-edit" v-bind:lead-id="index" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left lead-delete" v-bind:lead-id="item.lead_id" data-toggle="modal" data-target="#lead-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div> 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="lead-item-details">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="col-xl-12" id="lead-details-edit-loading">
+            <center><img src="/static/img/spinner.svg" width="100px"></center>
+        </div>
+        <div class="sidebar-header" id="lead-details-edit" style="display: none;">
+            <b class="mt-4">Basic Details</b>
+            <hr>
+            <div id="lead-item-details-body">
+                <div class="row">
+                    <div class="col-6">
+                        <p>First Name</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash(details.first_name) ]]</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Last Name</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash(details.last_name) ]]</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Email</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash(details.email) ]]</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Address</p>
+                    </div>
+                    <div class="col-6">
+                        <p>[[ returnDash(details.address1) ]] [[ details.address2 ]] [[ details.address3 ]], [[ details.city ]], [[ details.state ]] [[ details.postal_code ]]</p>
+                    </div>
+                </div>
+            </div>
+            <b class="mt-4">Call Logs</b>
+            <hr>
+            <div id="lead-item-recordings-body">
+                <div class="row" v-for="recording in recordings">
+                    <div class="col-6">
+                        <i class="fa fa-calendar"></i> [[formatNiceDateTime(recording.call_date_full)]]
+                    </div>
+                    <div class="col-3">
+                        <p>[[ recording.status ]]</p>
+                    </div>
+                    <div class="col-3">
+                        <a v-bind:href="recording.location"><i class="fa fa-stopwatch"></i> [[ recording.length_in_sec ]] S</a>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 50px; height: 100px;">&nbsp;</div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="caller-id-delete-modal" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-bell-55 ni-3x"></i>
+                    <h4 class="heading mt-4">Are you sure you want to delete this caller id?</h4>
+                    <p>This cannot be undone</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="caller-id-delete-conf" data-dismiss="modal">Yes, DELETE it</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+
+<script src="static/js/vueJS/listsV2.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/leadsListV2.js?v=1.3.11.1"></script>
+{% endblock %}

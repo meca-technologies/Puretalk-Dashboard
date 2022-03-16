@@ -1,0 +1,253 @@
+{% extends "vicidial/layout.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Call Manager</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+{% with loading_id='call-manager-body-loading', display_me='1' %}
+    <center>{% include "loading-bars.html" %}</center>
+{% endwith %}
+  <div class="row" id="call-manager-body" style="display: none;">
+    <div class="col-xl-4" v-for="(item, index) in campaigns" v-if="item.extra_detail.remaining_leads != -1 && item.active == 'Y'">
+        <div class="card border-top border-success">
+            <div class="card-header border-0">
+            <div class="row align-items-center">
+              <div class="col-7">
+              <h3 class="mb-0">[[ item.campaign_name ]]
+                  <div v-if="item.extra_detail.remaining_leads > 0 || item.extra_detail.lead_count == 0">
+                    <span class="text-success" v-if="item.extra_detail.status === 'RUNNING'">(RUNNING)</span>
+                    <span class="text-danger" v-else-if="item.extra_detail.status === 'STOPPED'">(STOPPED)</span>
+                    <span class="text-success" v-else-if="item.extra_detail.status === 'completed'">(COMPLETED)</span>
+                    <span class="text-danger" v-else>(NOT STARTED)</span>
+                  </div>
+                  <div v-else-if = "item.extra_detail.status !== null">
+                    <span class="text-success">(COMPLETED)</span>
+                  </div>
+                  <div v-else>
+                    <span class="text-danger">(NOT STARTED)</span>
+                  </div>
+              </h3>
+              </div>
+              <div class="col-4" style="text-align: right;">
+              <small><b>Last Run:</b> [[ formatNiceDate(item.campaign_calldate) ]]</small>
+              </div>
+              <div class="col-1" style="text-align: right;">
+                <a href="#" class="campaign-call" data-toggle="modal" data-target="#company-call" v-bind:campaign-id="item.campaign_id">
+                    <i class="fa fa-phone"></i>
+                </a>
+                <a href="#campaign-edit" class="sidebar-toggle campaign-edit" v-bind:campaign-id="index">
+                    <i class="ni ni-settings-gear-65 "></i>
+                </a>
+              </div>
+          </div>
+          <div class="row align-items-center mt-4">
+              <div class="col border-top border-bottom text-center">
+              <small><b>Remaining</b></small>
+              <p><b>[[ formatMoney(item.extra_detail.remaining_leads, 0) ]]</b></p>
+              </div>
+              <div class="col border text-center">
+              <small><b>Completed</b></small>
+              <p><b>[[ formatMoney(item.extra_detail.call_count, 0) ]]</b></p>
+              </div>
+              <div class="col border-top border-bottom text-center">
+              <small><b>Total</b></small>
+              <p><b>[[ formatMoney(item.extra_detail.lead_count, 0) ]]</b></p>
+              </div>
+          </div>
+          <div class="row align-items-center mt-4">
+              <span>Completed Leads: [[ formatMoney(item.extra_detail.call_count, 0) ]]/[[ formatMoney(item.extra_detail.lead_count, 0) ]]</span>
+              <div class="progress mt-2" style="width: 100%;">
+              <div class="progress-bar" :class="item.extra_detail.status === 'started' ? 'bg-success':'bg-danger'" role="progressbar" v-bind:aria-valuenow="item.extra_detail.call_count" aria-valuemin="0" v-bind:aria-valuemax="item.extra_detail.lead_count" style="width: 0%;"></div>
+              </div>
+          </div>
+            <div class="row align-items-center mt-4 p-2 text-white">
+                <div class="p-2 col ml-2">
+                    <a href="#" class="text-success control-campaign" v-bind:campaign-id="item.campaign_id" campaign-status="ACTIVE" v-if = "item.extra_detail.status !== null"><i class="fa fa-sync"></i> Resume</a>
+                    <a href="#" class="text-success control-campaign" v-bind:campaign-id="item.campaign_id" campaign-status="ACTIVE" v-else><i class="fa fa-sync"></i> Start</a>
+                </div>
+                <div class="p-2 col ml-2">
+                    <a href="#" class="text-warning control-campaign" v-bind:campaign-id="item.campaign_id" campaign-status="INACTIVE"><i class="fa fa-pause"></i> Pause</a>
+                </div>
+                <div class="p-2 col ml-2">
+                    <a href="#" class="text-danger control-campaign" v-bind:campaign-id="item.campaign_id" campaign-status="ACTIVE"><i class="fa fa-trash"></i> Terminate</a>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.campaign_name ]]</h2>
+            <hr>
+            <div id="campaign-edit-loading" >
+                <center>
+                    <img src="/static/img/spinner.svg"width="100px">
+                    <p>Loading Campaign...</p>
+                </center>
+            </div>
+            <div id="campaign-edit-body">
+                <b class="mt-4">Campaign Details</b>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small>Campaign Name</small>
+                        <input type="text" class="form-control" placeholder="Campaign Name" id="campaignEditName" v-bind:value="details.campaign_name"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Dial Timeout</small>
+                        <input type="number" class="form-control" placeholder="Dial Time" id="campaignEditDialTimeout" v-bind:value="details.dial_timeout"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Hopper Level</small>
+                        <input type="number" class="form-control" min="0" max="100" placeholder="Hopper Level" id="campaignEditHopperLevel" v-bind:value="details.hopper_level"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Number Of Lines</small>
+                        <input type="number" class="form-control" min="0" max="100" placeholder="Number Of Lines" id="campaignEditNumLines" v-bind:value="details.number_of_lines"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Transfer # DID</small>
+                        <input type="text" class="form-control" size="10" minlength="10" maxlength="10" placeholder="Transfer # DID" id="campaignEditDID" v-bind:value="details.xferconf_a_dtmf"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Campaign Caller ID</small>
+                        <input type="text" class="form-control" size="10" minlength="10" maxlength="10" placeholder="Campaign Caller ID" id="campaignEditCID" v-bind:value="details.campaign_cid"><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Caller ID Group</small>
+                        <select class="form-control" id="campaignEditCallerIDGroup" name="campaignEditCallerIDGroup">
+                            <option value="---DISABLED---" selected>Select Caller ID Group...</option>
+                            <option v-for="group in caller_id_groups" v-bind:value="group.cid_group_id" :selected="group.cid_group_id == details.cid_group_id">[[ group.cid_group_id ]]</option>
+                        </select><br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <small>Active</small>
+                        <select class="form-control" id="campaignEditActive">
+                            <option value="Y" :selected="details.active == 'Y'">Y</option>
+                            <option value="N" :selected="details.active == 'N'">N</option>
+                        </select><br>
+                    </div>
+                </div>
+                <b class="mt-4">Campaign Lists</b>
+                <table class="table mt-4">
+                    <thead>
+                        <th>List Name</th>
+                        <th>Lead Count</th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="list in lists">
+                            <td>[[ list.list_name ]]</td>
+                            <td>[[ list.tally ]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-company" class="btn btn-success">Save Campaign</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="company-call" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-success modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-success">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <center><img src="/static/img/spinner.svg" id="lead-form-details-loading" width="100px"></center>
+                    <div id="lead-form-details">
+                        <div class="row mt-4" v-for="detail in details">
+                            <div class="col-3" style="text-align: right;">
+                                [[ detail.field_name ]]
+                            </div>
+                            <div class="col-9">
+                                <input class="form-control form-control-alternative lead-call-data" v-bind:form-id="detail.id" v-bind:form-name="detail.field_name" type="text">
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-3" style="text-align: right;">
+                                Reference Number
+                            </div>
+                            <div class="col-9">
+                                <input class="form-control form-control-alternative" id="reference_number" type="tel">
+                                <small><i>THIS IS THE NUMBER THAT WILL BE DIALED</i></small>
+                            </div>
+                        </div>
+                    </div>
+                    <!--<input class="form-control form-control-alternative" id="reference_number" type="tel">-->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="call-lead" data-dismiss="modal">Call</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/moment.min.js"></script>
+<script src="/static/vendor/bootstrap-datetimepicker.js"></script>
+<script src="static/js/vueJS/campaignsV2.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/formbuilder.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/callmanagerV2.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/timecontroller.js?v=1.3.11.1"></script>
+
+<script>
+    $('body').on('click','.campaign-edit', function(){
+        $("#campaign-transparent").fadeIn(500);
+    });
+    $('body').on('click','.tab-btn', function(){
+        var tabID = $(this).attr("tab");
+        console.log(tabID);
+
+        var tabs = $(".tab");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            tabs[i].style.display = 'none';
+        }
+
+        var tabs = $(".tab-btn");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            $(tabs[i]).removeClass('active');
+        }
+
+        $(this).addClass('active');
+        document.getElementById(tabID).style.display = '';
+    });
+</script>
+{% endblock %}

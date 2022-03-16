@@ -1,0 +1,126 @@
+{% extends "twilio/layout.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">AI Agents</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">AI Agents</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Created At</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ai-agent-admin-body">
+                        <tr v-for='agent in aiAgentsAdmin'>
+                            <td tabindex="0">[[ agent.id ]]</td>
+                            <td>[[ agent.name ]]</td>
+                            <td>[[ formatDate(agent.created_at) ]]</td>
+                            <td>
+                                <span v-if="agent.status == 'Status.verified'" class="badge badge-success" style="cursor: pointer;" data-toggle="tooltip" data-original-title="Click To Switch Status">Verified</span>
+                                <span  v-else class="badge badge-danger" style="cursor: pointer;" data-toggle="tooltip" data-original-title="Click To Switch Status">Unverified</span>
+                            </td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#campaign-edit" class="sidebar-toggle btn btn-info btn-icon icon-left" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <a href="#campaign-edit" class="sidebar-toggle btn btn-danger btn-icon icon-left" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>**Company Name**</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Company Name</small>
+                    <input type="text" class="form-control" placeholder="Company Name"><br>
+                </div>
+                <div class="col">
+                    <small>Company Email</small>
+                    <input type="text" class="form-control" placeholder="Company Email"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Company Phone</small>
+                    <input type="text" class="form-control" placeholder="Company Phone"><br>
+                </div>
+                <div class="col">
+                    <small>Company Website</small>
+                    <input type="text" class="form-control" placeholder="Company Website"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Company Logo</small>
+                    <input type="text" class="form-control" placeholder="Company Logo"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Company Address</small>
+                    <textarea class="form-control"></textarea><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Locale</small>
+                    <input type="text" class="form-control" placeholder="Locale"><br>
+                </div>
+                <div class="col">
+                    <small>Status</small>
+                    <input type="text" class="form-control" placeholder="Status"><br>
+                </div>
+            </div>
+            <b class="mt-4">Account Details</b><br>
+            <div class="row">
+                <div class="col">
+                    <small>Email</small>
+                    <input type="email" class="form-control" placeholder="Email"><br>
+                </div>
+                <div class="col">
+                    <small>Password</small>
+                    <input type="password" class="form-control" placeholder="password"><br>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/aiagentsadmin.js?v=1.3.11.1"></script>
+{% endblock %}

@@ -1,0 +1,350 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/../static/js/base.js?v=1.3.11.1" type="text/css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+        <!-- Icons -->
+        <link rel="stylesheet" href="/../static/vendor/nucleo/css/nucleo.css" type="text/css">
+        <link rel="stylesheet" href="/../static/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+        <link rel="stylesheet" href="/../static/css/argon.min.css?v=1.3.11.1" type="text/css">
+        <link rel="stylesheet" href="/../static/css/base.css?v=1.3.11.1" type="text/css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <link rel="stylesheet" href="/../static/css/convo.css?v=1.3.11.1" type="text/css">
+    </head>
+    <body>
+        <nav class="col-12 p-4" style="position: absolute; top: 0px; z-index: 9999999999999;">
+            <div class="row text-white">
+                <div class="col-3">
+                    <a href="#" data-toggle="modal" data-target="#nlu-model">NLU Model</a>
+                </div>
+                <div class="col-3">
+                    <a href="#" class="btn btn-default" id="export-nlu">Export</a>
+                </div>
+            </div>
+        </nav>
+        <main class="main">
+            <div id="vf-canvas-container" class="bg-default" onwheel="scrollEventHandler()">
+                <div id="vf-canvas" style="transform:translate(0px, 0px);">
+                    <div class="card border border-default text-center convo-card convo-card-bg draggable bg-default text-white active-click" v-for="(item, index1) in holders" v-bind:holder-index="index1" v-bind:id="'holder-'+item.id" v-bind:style="item.style">
+                        <div class="card-header p-3" v-bind:holder-index="index1" style="background-image: none; background: none;">
+                            <h4 class="mb-0 text-white header-item" v-bind:holder-index="index1" data-toggle="modal" data-target="#header-details">[[item.label]]</h4>
+                            <div class="anchor-body anchor-body-end" style="position: absolute; margin-left: -147px; margin-top: -24px; visibility:hidden;">
+                                <div class="anchor-border">
+                                    <center><div class="circle anchor-end" v-bind:id="'anchor-'+item.id+'-left'" v-bind:holder-index="index1"></div></center>
+                                </div>
+                            </div>
+                            <div class="anchor-body anchor-body-end" style="position: absolute; margin-left: 0; margin-top: -53px; visibility:hidden;">
+                                <div class="anchor-border">
+                                    <center><div class="circle anchor-end" v-bind:id="'anchor-'+item.id+'-top'" v-bind:holder-index="index1"></div></center>
+                                </div>
+                            </div>
+                            <div class="anchor-body anchor-body-end" style="position: absolute; margin-left: 132px; margin-top: -24px; visibility:hidden;">
+                                <div class="anchor-border">
+                                    <center><div class="circle anchor-end" v-bind:id="'anchor-'+item.id+'-right'" v-bind:holder-index="index1"></div></center>
+                                </div>
+                            </div>
+                            <div class="btn edit-convo-card-btn" v-bind:holder-index="index1" data-toggle="modal" data-target="#speech-add-details" style="position: absolute; margin-left: 89px; margin-top: -43px;">
+                                <i class="fa fa-edit text-white" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="card-body p-2 text-left">
+                            <div class="card border border-default bg-default mb-2 card-item text-center add-item" v-if="!item.items.length" style="display:inline-block; width:100%; background-color: rgb(184, 184, 184);" v-bind:index="index1">
+                                <h1 style="color: rgb(136, 136, 136); margin-top: 7px;">+</h1>
+                            </div>
+                            <div class="card border border-default bg-default mb-2 card-item" style="display:inline-block; width:100%" v-for="(item, index2) in item.items" v-bind:holder-index="index1" v-bind:row-index="index2" v-bind:id="'row-'+item.id" v-if="item.type == 'speak'">
+                                <div style="width: 10%; display: inline-block; margin-left: 5px;">
+                                    <img src="/../static/img/icons/arrow-up.png" v-bind:holder-index="index1" v-bind:row-index="index2" class="row-item-control row-item-up border-default bg-default rounded p-1" style="margin-left: 2px;">
+                                    <img src="/../static/img/icons/arrow-down.png" v-bind:holder-index="index1" v-bind:row-index="index2" class="row-item-control row-item-down border-default bg-default rounded p-1" style="margin-left: 2px; margin-top: 8px;">
+                                </div>
+                                <div style="width: 80%; display: inline-block; position: relative; top: -5px;" class="pl-4 pt-2">
+                                    <p class="speech-item" v-bind:holder-index="index1" v-bind:row-index="index2" data-toggle="modal" data-target="#convo-details">[[item.label]]</p>
+                                </div>
+                            </div>
+                            <div class="card border border-default bg-default mb-2 card-item choice-item" data-toggle="modal" data-target="#choice-details" style="display:inline-block; width:100%" v-for="(item, index2) in item.items" v-bind:holder-index="index1" v-bind:row-index="index2" v-bind:id="'row-'+item.id" v-if="item.type == 'choice'">
+                                <div style="width: 10%; display: inline-block; margin-left: 5px; visibility: hidden;">
+                                    <img src="/../static/img/icons/arrow-up.png" v-bind:holder-index="index1" v-bind:row-index="index2" class="row-item-control row-item-up border-default bg-default rounded p-1" style="margin-left: 2px;">
+                                    <img src="/../static/img/icons/arrow-down.png" v-bind:holder-index="index1" v-bind:row-index="index2" class="row-item-control row-item-down border-default bg-default rounded p-1" style="margin-left: 2px; margin-top: 8px;">
+                                </div>
+                                <div style="width: 60%; display: inline-block; position: relative; top: -5px;" class="pl-4 pt-2">
+                                    <p>[[item.label]]</p>
+                                </div>
+                                <div class="anchor-body" style="position: relative; top: -12px; visibility: hidden;">
+                                    <div class="anchor-border">
+                                        <center><div class="anchor-center circle" v-bind:holder-index="index1" v-bind:row-index="index2" v-bind:id="'anchor-'+item.id"></div></center>
+                                    </div>
+                                </div>
+                                <div v-for="(choice, index3) in item.choices" class="border-top" style="border-color: #132542!important;">
+                                    <div style="width: 10%; display: inline-block; margin-left: 5px; visibility: hidden;">
+                                        <img src="/../static/img/icons/arrow-up.png" v-bind:holder-index="index1" v-bind:row-index="index2" v-bind:choice-index="index3" class="row-item-control row-item-up border-default bg-default rounded p-1" style="margin-left: 2px;">
+                                        <img src="/../static/img/icons/arrow-down.png" v-bind:holder-index="index1" v-bind:row-index="index2" v-bind:choice-index="index3" class="row-item-control row-item-down border-default bg-default rounded p-1" style="margin-left: 2px; margin-top: 8px;">
+                                    </div>
+                                    <div style="width: 60%; display: inline-block; position: relative; top: -5px;" class="pl-4 pt-2">
+                                        <p>[[choice.label]]</p>
+                                    </div>
+                                    <div class="anchor-body" style="position: relative; top: -12px;">
+                                        <div class="anchor-border">
+                                            <center><div class="anchor-center circle" v-bind:holder-index="index1" v-bind:row-index="index2" v-bind:choice-index="index3" v-bind:id="'anchor-'+item.id+'-'+choice.id"></div></center>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="line-body" style="position: absolute; top: 0px; left: 0px;">
+                    </div>
+                </div>
+            </div>
+            <div class="custom-modal" id="header-details" style="display: none;">
+                <div class="custom-modal-dialog convo-card-bg text-white p-4">
+                    <div class="custom-modal-header border-bottom border-default">
+                        <h2 class="text-white mb-4">Edit</h2>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4 class="text-white mb-4">Label</h4>
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control" id="edit-header-label" placeholder="label value" v-bind:value="details.label">
+                        </div>
+                    </div>
+                    <div class="custom-modal-footer border-top border-default mt-4 pt-4">
+                        <div class="btn btn-success" id="edit-header" data-dismiss="modal" data-target="#header-details">Save</div>
+                        <div class="btn btn-primary" data-dismiss="modal" data-target="#header-details">Close</div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-modal" id="convo-details" style="display: none;">
+                <div class="custom-modal-dialog convo-card-bg text-white p-4">
+                    <div class="custom-modal-header border-bottom border-default">
+                        <h2 class="text-white mb-4">Edit</h2>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4 class="text-white mb-4">Say</h4>
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control" id="edit-label" placeholder="label value" v-bind:value="details.label">
+                        </div>
+                    </div>
+                    <div class="custom-modal-footer border-top border-default mt-4 pt-4">
+                        <div class="btn btn-success" id="edit-speech" data-dismiss="modal" data-target="#convo-details">Save</div>
+                        <div class="btn btn-primary" data-dismiss="modal" data-target="#convo-details">Close</div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-modal" id="choice-details" style="display: none;">
+                <div class="custom-modal-dialog convo-card-bg text-white p-4" style="margin-top: 50px;">
+                    <div class="custom-modal-header border-bottom border-default">
+                        <h2 class="text-white mb-4">Choice Edit</h2>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4 class="text-white mb-4">Label</h4>
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control" id="edit-choice-label" placeholder="label value" v-bind:value="details.label">
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4 class="text-white mb-4">Choices</h4>
+                        </div>
+                    </div>
+                    <div class="custom-modal-body scrollbar-container" style="overflow-y: scroll; overflow-x: hidden; height: 435px;">
+                        <div class="mb-4 card p-4 border-default bg-default row" v-for="(choice, index) in details.choices">
+                            <div class="row col-12 ml-0 mr-0">
+                                <h4 class="text-white mb-4">Choice Block</h4>
+                            </div>
+                            <div class="row col-12 ml-0 mr-0">
+                                <input class="form-control choice-label col-10" placeholder="label value" v-bind:choice-index="index" v-bind:value="choice.label">
+                                <a href="#" class="col-2 text-right pr-0 delete-choice" v-bind:choice-index="index"><i class="btn btn-danger p-1 pl-2 pr-2 text-white fa fa-trash" aria-hidden="true" style="width: 46px;height: 46px;line-height: 34px;"></i></a>
+                            </div>
+                            <div class="row col-12 mt-4 ml-0 mr-0">
+                                <select class="col-12 form-control choice-intent" v-bind:choice-index="index">
+                                    <option v-for="intent in intents">[[ intent.name ]]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row card p-4 border-default bg-default">
+                            <div class="btn btn-success text-center" id="add-choice">+ Add Choice</div>
+                        </div>
+                    </div>
+                    <div class="custom-modal-footer border-top border-default mt-4 pt-4">
+                        <div class="btn btn-success" id="edit-choice" data-dismiss="modal" data-target="#choice-details">Save</div>
+                        <div class="btn btn-primary" data-dismiss="modal" data-target="#choice-details">Close</div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-modal" id="nlu-model" style="display: none;">
+                <div class="custom-modal-dialog convo-card-bg text-white p-4">
+                    <div class="custom-modal-header ">
+                        <ul class="nav nav-tabs custom-tab border-bottom border-default" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link setting-link active" tab-group="settings" tab-target="nlu-intents" data-toggle="tab" href="#nlu-intents" role="tab" aria-controls="twilio-settings-app" aria-selected="true">Intents</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link setting-link" tab-group="settings" tab-target="nlu-entities" data-toggle="tab" href="#nlu-entities" role="tab" aria-controls="twilio-numbers-app" aria-selected="true">Entities</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link setting-link" tab-group="settings" tab-target="nlu-variables" data-toggle="tab" href="#nlu-variables" role="tab" aria-controls="twilio-numbers-app" aria-selected="true">Variables</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="custom-modal-body">
+                        <div class="tab-content" id="myTabContent">
+                            <div class="setting-tab active" tab-parent="settings" id="nlu-intents" role="tabpanel" aria-labelledby="nlu-intents">
+                                <div class="row ml-0">
+                                    <div class="col-4 border-right border-default p-0">
+                                        <div class="custom-modal-list pr-1 scrollbar-container">
+                                            <li v-for="(intent, index) in intent.intents" v-bind:index="index" class="intent-row" v-bind:class="index==0?'active':''"><a href="#"><i class="btn btn-danger-hover p-1 pl-2 pr-2 text-white fa fa-trash" aria-hidden="true"></i></a> [[ intent.name ]] <span class="text-gray" style="float: right;">[[ intent.examples.length ]]</span></li>
+                                        </div>
+                                        <div class="border-top border-default pt-2 pr-2">
+                                            <div class="row">
+                                                <input class="form-control col-10" placeholder="Search...">
+                                                <a href="#" class="btn btn-sm btn-default rounded-circle ml-1 mt-2 col-1" id="intent-add-row" style="padding-left: 9px;padding-right: 16px;height: 28px;" v-bind:parent-index="intent.details.parent_index">+</a> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="col-12 mt-4 mb-4 row">
+                                            <input class="form-control col-12" id="intent-name" v-bind:parent-index="intent.details.parent_index" v-bind:value="intent.details.name">
+                                        </div>
+                                        <div class="col-12 border-top border-default pt-4 pb-4">
+                                            <h4 class="pl-0" class="text-white"><b>Utterances</b></h4>
+                                            <li class="row mb-2">
+                                                <input class="form-control col-10 tied-form-output" data-target="#new-example-value" id="new-example" placeholder="Add Example" v-bind:parent-index="intent.details.parent_index" style="position: absolute; top: -10000px;">
+                                                <div class="form-control tied-form-output col-10" id="new-example-value" data-target="#new-example"></div>
+                                                <div class="col-1">
+                                                    <a href="#" class="btn btn-sm btn-default rounded-circle mt-2" id="example-add-row" style="padding-left: 9px; padding-right: 9px;" v-bind:parent-index="intent.details.parent_index">+</a> 
+                                                </div>
+                                            </li>
+                                        </div>
+                                        <div class="col-12 pt-4 scrollbar-container intent-holder border-top border-default" style="height: 305px; max-height: 305px;" v-if="intent.details.examples.length > 0">
+                                            <li class="row mb-2" v-for="(example, index) in intent.details.examples">
+                                                <input class="form-control col-10 tied-form-input" v-bind:id="'input-'+example.id" v-bind:data-target="'#output-'+example.id" v-bind:value="example.label" style="position: absolute; top: -10000px;">
+                                                <div class="col-10 form-control tied-form-output" v-bind:id="'output-'+example.id" v-bind:data-target="'#input-'+example.id">[[example.label]]</div>
+                                                <div class="col-1">
+                                                    <a href="#" class="btn btn-sm btn-default rounded-circle mt-2 example-del-row" v-bind:parent-index="intent.details.parent_index" v-bind:index="index" style="padding-left: 11px; padding-right: 11px;">-</a> 
+                                                </div>
+                                            </li>
+                                        </div>
+                                        <div v-else class="border-top border-default pt-4 text-center">
+                                            <p>No Examples</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-tab" id="nlu-entities" tab-parent="settings" role="tabpanel" aria-labelledby="nlu-entities">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <input class="form-control tied-form-input" id="input-value" data-target="#output-value" style="position: absolute; top: -10000px;">
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-control tied-form-output" id="output-value" data-target="#input-value"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-tab" id="nlu-variables" tab-parent="settings" role="tabpanel" aria-labelledby="nlu-variables">
+                                Tab 3
+                            </div>
+                        </div>
+                    </div>
+                    <div class="custom-modal-footer border-top mt-2 pt-4 d-none">
+                        <div class="btn btn-primary" data-toggle="modal" data-target="#nlu-model">Close</div>
+                    </div>
+                </div>
+            </div>
+            <div class="custom-modal" id="speech-add-details" style="display: none;">
+                <div class="custom-modal-dialog convo-card-bg text-white p-4">
+                    <div class="custom-modal-header border-bottom border-default">
+                        <h2 class="text-white mb-4">Edit Block</h2>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h4 class="text-white mb-4">Say</h4>
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control" id="add-speech-label" placeholder="Say Value">
+                        </div>
+                        <div class="col-12 mt-4">
+                            <div class="btn btn-success" id="add-speech" data-dismiss="modal" data-target="#speech-add-details">Add Speech</div>
+                        </div>
+                    </div>
+                    <div class="custom-modal-footer border-top border-default mt-4 pt-4">
+                        <div class="btn btn-danger" id="delete-block" data-dismiss="modal" data-target="#speech-add-details">Delete Block</div>
+                        <div class="btn btn-primary" data-dismiss="modal" data-target="#speech-add-details">Close</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div style="position: absolute; top: 10px; right: 10px; width: 100px; height: 50px; z-index: 99999999999999;" id="canvas-details">
+            <div class="card border-default bg-white text-center">
+                <h4 class="mt-2">[[zoom]]</h4>
+            </div>
+        </div>
+        <div style="position: absolute; bottom: 10px; right: 10px; width: 100px; height: 50px; z-index: 99999999999999; display: none;" id="saving-card">
+            <div class="card border-default bg-white text-center">
+                <h4 class="mt-2">Saving...</h4>
+            </div>
+        </div>
+        <ul class='custom-menu' id="flow-menu">
+            <li data-type="flow-menu" data-action="insert">Add New Block</li>
+        </ul>
+        <ul class='custom-menu' id="line-edit-menu">
+            <li data-action="color">
+                <input type="color" value="#ff0000" style="width:85%;">
+            </li>
+            <li data-type="line-item" data-action="delete">Delete</li>
+        </ul>
+        <ul class='custom-menu' id="convo-menu">
+            <li data-type="convo" data-action="delete">Delete</li>
+        </ul>
+        <ul class='custom-menu' id="convo-item-menu">
+            <li data-type="convo-item" data-action="delete">Delete</li>
+        </ul>
+        <div class="row col-12 justify-content-end mt-2" style="position: fixed; top: 0px;">
+          <div class="col-sm-10 col-md-4" id="alert-holder" style="display: none;">
+            <div v-for="alert in alerts">
+              <div v-if="alert.status == 'danger'" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                  <span class="alert-icon"><i class="ni ni-air-baloon"></i></span>
+                  <span class="alert-text"><strong>Failure!</strong> [[ alert.message ]]</span>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div v-else class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                  <span class="alert-icon"><i class="ni ni-check-bold"></i></span>
+                  <span class="alert-text"><strong>Success!</strong> [[ alert.message ]]</span>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+            </div>
+          </div>
+        </div>
+    </body>
+    
+    <script src="../static/js/base.js?v=1.3.11.1"></script>
+    <script src="../static/js/tabs.js?v=1.3.11.1"></script>
+    <script>
+        function generateID(length=6) {
+            var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var result = '';
+            for ( var i = 0; i < length; i++ ) {
+                result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+            }
+            return result;
+        }
+    </script>
+    <script src="../static/js/conversationFlow/convoManager.js"></script>
+    <script src="../static/js/conversationFlow/flowEditor.js"></script>
+    <script src="../static/js/conversationFlow/customModal.js"></script>
+    <script src="../static/js/conversationFlow/intentBuilder.js"></script>
+    <script src="../static/js/conversationFlow/customInput.js"></script>
+    <script src="../static/js/conversationFlow/cardEditor.js"></script>
+    <script src="../static/js/conversationFlow/activeClick.js"></script>
+    <script src="../static/js/conversationFlow/contextMenu.js"></script>
+</html>

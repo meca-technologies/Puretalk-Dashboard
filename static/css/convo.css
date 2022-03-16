@@ -1,0 +1,270 @@
+* {
+    box-sizing: border-box;
+}
+body{
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+    overflow: hidden;
+}
+.line{
+}
+.main{
+    position: relative;
+    -webkit-box-flex: 1;
+    flex-grow: 1;
+    background: rgb(249, 249, 249);
+    overflow: clip;
+    display: block;
+    background-color: #f9f9f9!important;
+    height: 100vh;
+}
+#vf-canvas-container{
+    width: 100%;
+    height: 100%;
+    overflow: clip;
+}
+#vf-canvas{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: clip;
+    user-select: none;
+}
+.border-gray{
+    border-color: #d8dadd!important;
+}
+.card-item{
+    border-radius: 2px !important;
+}
+.convo-card{
+    width: 280px;
+}
+.convo-card-bg{
+    background-color: #1d355e!important;
+}
+nav{
+    background-color: #1d355e!important;
+    box-shadow: 0 0 2rem 0 rgb(0 0 0 / 15%)
+}
+#vf-canvas-container, #vf-canvas{
+    overflow: visible !important;
+}
+.grabber{
+    width: 10%;
+    display: inline-block;
+    margin-left: 5px;
+    position: relative;
+    top: 2px;
+    opacity: .3;
+    height: 41px;
+}
+.anchor-body{
+    width: 15%; 
+    display: inline-block;
+}
+.anchor-border{
+    width: 15px; 
+    height: 15px; 
+    border: 1px solid rgb(163, 166, 172); 
+    border-radius: 10px; 
+    position: relative; 
+    top: 7px;
+}
+.anchor-center, .anchor-end{
+    width: 7px;
+    height: 7px;
+    background-color: rgb(163, 166, 172);
+    border-radius: 10px;
+    margin-top: 3px;
+}
+.anchor-border:hover{
+    cursor:copy;
+}
+.anchor-body-end .anchor-border{
+    border-color: red;
+    border: none !important;
+}
+.anchor-body-end .anchor-border .anchor-end{
+    width: 11px;
+    height: 11px;
+    background-color: red;
+}
+.card{
+    box-shadow: 0 0 2rem 0 rgb(0 0 0 / 15%)
+}
+.border-default{
+    border-color: #132542!important;
+}
+
+/* The whole thing */
+.custom-menu {
+    display: none;
+    z-index: 1000;
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid #CCC;
+    white-space: nowrap;
+    font-family: sans-serif;
+    background: #FFF;
+    color: #333;
+    border-radius: 5px;
+    padding: 0;
+}
+#line-edit-menu {
+}
+
+/* Each of the items in the list */
+.custom-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+    list-style-type: none;
+    transition: all .3s ease;
+    user-select: none;
+}
+
+.custom-menu li:hover {
+    background-color: #DEF;
+}
+
+.add-item:hover{
+    opacity: .8;
+    cursor: pointer;
+}
+.add-item:active{
+    opacity: .9;
+    cursor: pointer;
+    transform: translate(0px, -1px);
+    /*-webkit-box-shadow: 0px 3px 2px -2px rgba(0,0,0,0.33); 
+    box-shadow: 0px 3px 2px -2px rgba(0,0,0,0.33);*/
+}
+
+.row-item-control:hover{
+    opacity: .8;
+    cursor: pointer;
+}
+
+.row-item-control:active{
+    opacity: .9;
+}
+.custom-modal{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+    z-index: 9999999999999;
+}
+.custom-modal:hover{
+    cursor: pointer;
+}
+.custom-modal-dialog{
+    width: 700px;
+    height: auto;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 200px;
+    border-radius: 5px;
+    box-shadow: 0 0 2rem 0 rgba(0,0,0,.15)!important;
+}
+.custom-modal-dialog:hover{
+    cursor: initial;
+}
+.custom-modal-header{
+    /*border-bottom: 1px rgb(163, 166, 172) solid;*/
+}
+.custom-modal-body{
+    height: 535px;
+    /*display: inline-block;*/
+}
+.custom-modal-footer{
+    /*border-top: 1px rgb(163, 166, 172) solid;*/
+}
+.custom-modal-list{
+    list-style: none;
+    width: 100%;
+    height: 460px;
+    overflow-y: scroll;
+}
+.custom-modal-list li{
+    border-top: 1px #1d355e solid;
+    border-bottom: 1px #1d355e solid;
+    padding: .5em;
+    width: 100%;
+    color: inherit;
+}
+.custom-modal-list li span{
+    color: #8898aa!important;
+}
+.custom-modal-list li:hover{
+    background-color: rgba(94, 114, 228, 1) !important;
+    cursor: pointer;
+    color: white !important;
+}
+.custom-modal-list li.active{
+    background-color: rgba(94, 114, 228, 1) !important;
+    color: white;
+    border-top: 1px #1d355e solid;
+    border-bottom: 1px #1d355e solid;
+}
+.custom-modal-list li.active:hover, .custom-modal-list li:active{
+    background-color: rgb(72, 90, 192) !important;
+    cursor: pointer;
+    color: white;
+}
+.scrollbar-container::-webkit-scrollbar {
+    width: 7px;
+}
+
+/* Track */
+.scrollbar-container::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+/* Handle */
+.scrollbar-container::-webkit-scrollbar-thumb {
+    background: #8898aa; 
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+.scrollbar-container::-webkit-scrollbar-thumb:hover {
+    background: #727f8f ; 
+}
+.intent-holder{    
+    max-height: 248px;
+    overflow-y: scroll;
+}
+.btn-danger-hover:hover{
+    border-color: #f5365c;
+    background-color: #f5365c;
+}
+.cursor{
+    width: 1px;
+    height: 10px;
+    animation-name: example;
+    animation-duration: .5s;
+    animation-iteration-count: infinite;
+    transition: 0;
+}
+.nav-tabs .nav-link.active, .nav-tabs .nav-link:hover{
+    border-color: rgba(94, 114, 228, 1) !important;
+}
+.border-primary {
+    border-color: #5e72e4!important;
+}
+
+.speech-item:hover, .choice-item:hover{
+    cursor: pointer;
+}
+
+@keyframes example {
+    0%   {opacity:0}
+    100%  {opacity:1}
+}

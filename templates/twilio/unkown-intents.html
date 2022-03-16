@@ -1,0 +1,204 @@
+{% extends "twilio/layout.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+
+<style>
+    .dispo-check{
+        margin-top: 5px;
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">NLU Inbox</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <b>Campaign</b>
+                        <center><img src="/static/img/spinner.svg" id="campaign-body-loading" width="100px"></center>
+                        <select style="display: none;" class="form-control select2 select2-hidden-accessible mt-2 lead-campaigns" id="campaign-body" name="campaign-body" tabindex="-1" aria-hidden="true" value="{{campaign}}">
+                            <option value="">Select Campaign...</option>
+                            <option v-for="campaign in campaigns" v-bind:value="campaign.id">[[ campaign.name ]]</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <!-- Projects table -->    
+                <div id="unkown-intents-loading" style="display: none;">
+                    {% with loading_id='', display_me='1' %}
+                    <center>{% include "loading-bars.html" %}</center>
+                    {% endwith %}
+                </div>
+                <div class="" >
+                    <!-- Projects table -->
+                    <table class="table align-items-center table-flush" id="unkown-intents" style="display: none;" sort-col="9" sort-style="desc" page-length="100">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">AI Response</th>
+                                <th scope="col">Customer Response</th>
+                                <th scope="col">Confidence</th>
+                                <th scope="col">Created</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-body">
+                            <tr v-for='lead in unkownIntents'>
+                                <td tabindex="0">[[ lead.id ]]</td>
+                                <td>[[ lead.last_ai_utterance ]]</td>
+                                <td>[[ lead.last_utterance ]]</td>
+                                <td><span class="badge badge-danger" style="font-size: 12px;">[[ lead.confidence ]]%</span></td>
+                                <td>[[ formatDateTime(lead.created_at) ]]</td>
+                                <td>
+                                    <div class="buttons">
+                                        <a href="#unknown-intent-edit" class="sidebar-toggle btn btn-info btn-icon icon-left unknown-intent-edit custom-popover" v-bind:campaign-id="lead.campaign_id" v-bind:lead-id="lead.lead_id" v-bind:call-id="lead.call_id" data-toggle="tooltip" data-original-title="Edit" popover-text="Edit Lead"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                        <a href="#unknown-intent-check" class="btn btn-success btn-icon icon-left unknown-intent-check custom-popover" v-bind:intent-id="lead.id" data-toggle="tooltip" data-original-title="Edit" popover-text="Complete Lead"><i class="fa fa-check" aria-hidden="true"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="unknown-intent-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div id="unknown-intent-edit-loading">
+            <center>
+                <img src="/static/img/spinner.svg" width="100px">
+                <p>Loading Lead Details</p>
+            </center>
+        </div>
+        <div class="sidebar-header" id="unknown-intent-edit-body">
+            <b class="mt-4">Basic Details</b>
+            <hr>
+            <div class="row">
+                <div class="col-6 d-none">
+                    <p>Campaign</p>
+                </div>
+                <div class="col-6 d-none">
+                    <p>[[ details.campaign_name ]]</p>
+                </div>
+                <div class="col-6 d-none">
+                    <p>Last Actioned By</p>
+                </div>
+                <div class="col-6 d-none">
+                    <p> - </p>
+                </div>
+                <div class="col-6 d-none">
+                    <p>Book Appointment</p>
+                </div>
+                <div class="col-6 d-none">
+                    <p> [[ details.appointment_booked ]] </p>
+                </div>
+                <div class="col-6">
+                    <p>Call Duration</p>
+                </div>
+                <div class="col-6">
+                    <p>[[ returnDash(details.time_taken) ]] S</p>
+                </div>
+                <div class="col-6">
+                    <p>Interested</p>
+                </div>
+                <div class="col-6">
+                    <span v-if="details.interested == 'interested'" class="badge badge-success">Interested</span>
+                    <span v-else-if="details.interested == 'not_interested'" class="badge badge-danger">Not Interested</span>
+                    <span v-else>-</span>
+                </div>
+            </div>
+            <br>
+            <b class="mt-4">Lead Data Info</b>
+            <hr>
+            <div class="row">
+                <div class="col-6">
+                    <p>ID</p>
+                </div>
+                <div class="col-6">
+                    <p>[[ returnDash(details.id) ]]</p>
+                </div>
+            </div>
+            <div class="row" v-for="detail in details.lead_data">
+                <div class="col-6">
+                    <p>[[detail.field_name]]</p>
+                </div>
+                <div class="col-6">
+                    <p>[[ returnDash(detail.field_value) ]]</p>
+                </div>
+            </div>
+            <br>
+            <b class="mt-4">Call Log</b>
+            <hr>
+            <div class="row">
+                <div class="col-6">
+                    <i class="fa fa-calendar"></i> [[formatNiceDateTime(details.call_log.updated_at)]]
+                </div>
+                <div class="col-6">
+                    <a v-bind:href="details.call_log.recording_link" target="_blank"><i class="fa fa-stopwatch"></i> [[ details.call_log.time_taken ]] S</a>
+                </div>
+                <div class="col-12 mb-4">
+                    <audio id="recording-audio" controls>
+                        <source v-bind:src="details.call_log.recording_link" type="audio/mpeg">
+                    </audio>
+                </div>
+                <div class="col-12 mb-4" v-if="details.call_log.transcription">
+                    <div class="rounded bg-default p-3 text-white">
+                        <p v-for="transcription in details.call_log.transcription" v-html="transcription">---------------</p>
+                    </div>
+                </div><br>
+            </div>
+            <br>
+            <span v-if="details.call_recordings" class="d-none">
+                <b class="mt-4">Call Recordings</b>
+                <hr>
+                <div class="row" v-for="recording in details.call_recordings">
+                    <div class="col-6">
+                        <i class="fa fa-calendar"></i> [[formatNiceDateTime(recording.updated_at)]]
+                    </div>
+                    <div class="col-6">
+                        <a v-bind:href="recording.recording_link" target="_blank">Recording</a>
+                    </div>
+                </div>
+            </span>
+            <div style="width: 50px; height: 100px;">&nbsp;</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+
+<script src="static/js/vueJS/campaigns.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/unkownintents.js?v=1.3.11.1"></script>
+<script>
+    updateCampaigns(true, false, false);
+</script>
+{% endblock %}

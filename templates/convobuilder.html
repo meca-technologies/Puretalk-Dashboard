@@ -1,0 +1,397 @@
+<!doctype html>
+<html>
+<head>
+<title>jQuery UI Draggable</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+<!-- Icons -->
+<link rel="stylesheet" href="static/vendor/nucleo/css/nucleo.css" type="text/css">
+<link rel="stylesheet" href="static/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+<link rel="stylesheet" href="static/css/argon.min.css?v=1.3.11.1" type="text/css">
+<link rel="stylesheet" href="static/css/base.css?v=1.3.11.1" type="text/css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+<style type="text/css">
+body{
+    background-size: 20px 20px;
+    background-image:
+    linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px);
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+    transition: .3s;
+}
+.convo-card {
+    width: 270px;
+    height: auto;
+    text-align: center;
+}
+.logic-card{
+    width: 220px;
+    height: auto;
+    text-align: center;
+    /*pointer-events:auto;*/
+}
+
+.logic-card:active{
+    /*pointer-events: none;*/
+}
+
+.holder{
+    width: 220px;
+    text-align: center;
+    height: 72px;
+}
+.convo-card .holder{
+    width: 220px;
+    text-align: center;
+    height: auto;
+    transition: .3s;
+    max-height: 72px;
+    height: 72px;
+    min-height: 72px;
+    max-height: 72px;
+}
+.convo-card .holder-active{
+    transition: .3s;
+    height: 72px;
+    min-height: 72px;
+    max-height: 72px;
+}
+.convo-card:hover, .logic-card:hover{
+    cursor: grab;
+}
+.convo-card:active, .logic-card:active{
+    cursor: grabbing;
+}
+.anchor-point{
+    width: 12px;
+    height: 12px;
+    background-color: red;
+    border-radius: 10px;
+    position: relative;
+}
+.anchor-point:hover{
+    cursor: copy;
+}
+.anchor-point-left{
+    left: -37px;
+    top: -37px;
+}
+.anchor-point-top{
+    right: -106px;
+    top: -89px;
+}
+.anchor-point-right{
+    right: -229px;
+    top: -60px;
+}
+
+.row-item{
+    max-height: 72px;
+}
+</style>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js">
+</script>
+</head>
+<body id="body">
+    <a href="#" id="addThis" class="btn btn-primary">Add This</a>
+    <canvas id="canvas" width=300 height=300></canvas>
+    <div id="canvas-body">
+        <div class="card draggable border convo-card p-2" v-for="(holder, index) in convo_holders" v-bind:style="holder.position">
+            <div class="card-header">
+                <p style="position: relative; top: -20px;">[[ holder.label ]]</p>
+                <div class="anchor-point anchor-point-left"></div>
+                <div class="anchor-point anchor-point-top"></div>
+                <div class="anchor-point anchor-point-right"></div>
+            </div>
+            <div class="card-body p-4 border rounded" v-bind:body-index="index" style="background-color: #e9e9e9; border-color: #c1c1c1!important; position: relative; top: -35px;">
+                <div class="row" style="width: 130% !important;" v-for="(item, index) in holder.items">
+                    <div class="col-1 row">
+                        <div class="col-12 add-btn bg-default border" v-bind:row-index="index" style="margin-top: -2px;">+</div>
+                        <div class="col-12 sub-btn sub-param-btn border border-default" v-bind:row-index="index" style="margin-top: -19px;">-</div>
+                    </div>
+                    <div class="col-10 ml-4">
+                        <a href="#convo-item-edit" v-bind:row-index="index" class="sidebar-toggle row-item card bg-default p-4 text-white">
+                            <small>[[item.label]]</small>
+                            <div class="anchor-point anchor-point-right" style="right: -139px;top: -12px;"></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border p-4 text-center" style="width: 300px; position: fixed; top: 50px; left: 50px;">
+            <div class="card holder bg-gray text-white">
+                <div class="card draggable logic-card bg-default p-4 text-white">
+                    Card 1
+                    <div class="anchor-point anchor-point-right" id="example1"></div>
+                </div>
+            </div>
+            <div class="card holder bg-gray text-white">
+                <div class="card draggable logic-card bg-default p-4 text-white">Card 2</div>
+            </div>
+            <div class="card holder bg-gray text-white">
+                <div class="card draggable logic-card bg-default p-4 text-white">Card 3</div>
+            </div>
+            <div class="card holder bg-gray text-white">
+                <div class="card draggable logic-card bg-default p-4 text-white">Card 4</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-modal" id="convo-item-edit">
+        <div class="sidebar-transparent"></div>
+        <div class="sidebar-content bg-white shadow shadow-lg p-4">
+            <div class="sidebar-header">
+                <h2>Convo Edit</h2>
+                <hr>
+                <div class="row">
+                    <div class="col">
+                        <small>Label</small>
+                        <input type="text" id="editConvoLabel" class="form-control" placeholder="Convo Label" v-bind:value="details.label"><br>
+                    </div>
+                </div>
+                <hr>
+                <div class="row justify-content-center">
+                    <a href="#" id="edit-convo" class="btn btn-success">Save Convo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="static/js/sidebar.js?v=1.3.10.6"></script>
+<script type="text/javascript">
+    var ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth*3;
+    canvas.height = window.innerHeight*3;
+    ctx.lineWidth = 3;
+
+    var $canvas = $("#canvas");
+    var canvasOffset = $canvas.offset();
+    var offsetX = canvasOffset.left;
+    var offsetY = canvasOffset.top;
+
+    var connectors = [];
+
+    var curr_card = null;
+
+    var drag_function = {
+        drag: function(event){
+            //curr_card = event.toElement;
+            connect();
+        },
+        stop:function(event){
+            curr_card = null;
+        }
+    };
+
+    var drop_function = {
+        accept:function (myDragBox) {
+            console.log($(myDragBox).hasClass('draggable'));
+            return true;
+        },
+        drop :function(event){
+            console.log(event);
+            $(event.toElement).appendTo(event.target);
+            $(event.toElement).css({left:0, top:0});
+        }
+    };
+    $( function(){
+        $(".draggable").draggable(drag_function);
+        $( ".holder" ).droppable(drop_function);
+    });
+    $(document).ready(function(){
+        var cards = document.getElementsByClassName('convo-card');
+        var top = window.innerHeight*-3;
+        console.log(top);
+        for(var i = 0; i<cards.length; i++){
+            var pos = $(cards[i]).position()
+            console.log(pos['left']);
+            top+=30;
+            $(cards[i]).css({left:pos['left']+400, top:top });
+        }
+        
+        $('body').on('mousedown','.logic-card', function(){
+            curr_card = this;
+            $(this).css('zIndex', '999999999999999999')
+        })
+
+        $('body').on('mouseup','.logic-card', function(){
+            $(this).css('zIndex', 'inherit');
+        })
+
+        var conv_card = null;
+        var curr_anchor = null;
+        var new_anchor = null;
+        var curr_line = {};
+        $('body').on('mousedown','.anchor-point', function(){
+            curr_anchor = this;
+            curr_line['from'] = $(this);
+            conv_card = $(this).parent();
+            console.log(conv_card[0]);
+            $($(conv_card[0]).parent()).draggable( "destroy" );
+        });
+
+        $('body').on('mouseup','.anchor-point', function(){
+            if(curr_anchor != this && conv_card != $(this).parent()){
+                curr_line['to'] = $(this);
+                console.log(Object.keys(['from'][0]));
+                for(var i = 0; i<connectors.length; i++){
+                    if(curr_line['from'] == connectors[i]['from'] && curr_line['to'] == connectors[i]['to']){
+                        console.log('Found');
+                    }
+                }
+                console.log(curr_line);
+                connectors.push(curr_line);
+                curr_line = {};
+                connect();
+            }
+        });
+
+        $("#body").mouseup(function(e) {
+            if(conv_card){
+                $($(conv_card[0]).parent()).draggable(drag_function);
+                conv_card = null;
+            }
+        });
+        
+        var last_hover = null; 
+        $(document).mousemove(function(){
+            if(curr_card){
+                if(($(".convo-card:hover").length != 0)){
+                    last_hover = $(".convo-card:hover")[0];
+                    var holders = last_hover.querySelectorAll('.holder');
+                    for(var i = 0; i<holders.length; i++){
+                        //$(holders[i]).addClass('holder-active');
+                    }
+                }
+            } else{
+                if(last_hover){
+                    var holders = last_hover.querySelectorAll('.holder');
+                    for(var i = 0; i<holders.length; i++){
+                        //$(holders[i]).removeClass('holder-active');
+                    }
+                    last_hover = null;
+                }
+            }
+        });
+        connect();
+
+        $("#addThis").click(function(){
+            conversation.convo_holders.push({
+                'label':'Test Label 2',
+                'position':{
+                    'left':'400px',
+                    'top':'-2877px'
+                },
+                'items':[{
+                    'label':'Test Sub Label 2',
+                }]
+            })
+            setTimeout(function(){
+                var draggables = document.getElementsByClassName('draggable');
+                for(var i = 0; i<draggables.length; i++){
+                    $(draggables[i]).draggable(drag_function);
+                }
+
+                var droppables = document.getElementsByClassName('holder');
+                for(var i = 0; i<droppables.length; i++){
+                    $(droppables[i]).droppable(drop_function);
+                }
+            }, 1000)
+        })
+    });
+
+    function connect() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < connectors.length; i++) {
+            var c = connectors[i];
+            var eFrom = c.from;
+            var eTo = c.to;
+            var pos1 = eFrom.offset();
+            var pos2 = eTo.offset();
+            var size1 = eFrom.size();
+            var size2 = eTo.size();
+            ctx.beginPath();
+            ctx.moveTo(pos1.left + eFrom.width() + 3, (pos1.top + eFrom.height() + 30) / 2);
+            ctx.lineTo(pos2.left + 5, (pos2.top + eTo.height() + 30) / 2);
+            ctx.stroke();
+        }
+    }
+</script>
+<script type="text/javascript">
+    var conversation = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#canvas-body',
+        data: {
+            convo_holders:[{
+                'label':'Test Label',
+                'position':{
+                    'left':'400px',
+                    'top':'-2877px'
+                },
+                'items':[{
+                    'label':'Test Sub Label 1',
+                }]
+            }]
+        }
+    })
+
+    var curr_convo_item = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#convo-item-edit',
+        data: {
+            body_index:null,
+            row_index:null,
+            details:{
+
+            }
+        }
+    })
+    
+    $('body').on('click','.row-item', function(){
+        var body_index = $(this).parent().parent().parent().attr('body-index');
+        var row_index = $(this).attr('row-index');
+        console.log(body_index);
+        console.log(row_index);
+        curr_convo_item.body_index = body_index;
+        curr_convo_item.row_index = row_index;
+        console.log(conversation.convo_holders[body_index]['items'][row_index]);
+        curr_convo_item.details = conversation.convo_holders[body_index]['items'][row_index];
+        console.log(curr_convo_item.details);
+    })
+    
+    $('body').on('click','.add-btn', function(){
+        var body_index = $(this).parent().parent().parent().attr('body-index');
+        var row_index = $(this).attr('row-index');
+        console.log(body_index);
+        console.log(row_index);
+        var item_length = conversation.convo_holders[body_index]['items'].length;
+        conversation.convo_holders[body_index]['items'].push({
+            'label':'Test Sub Label ' + String(parseInt(item_length) + 1),
+        })
+        
+    })
+    
+    $('body').on('click','.sub-btn', function(){
+        var body_index = $(this).parent().parent().parent().attr('body-index');
+        var row_index = $(this).attr('row-index');
+        console.log(body_index);
+        console.log(row_index);
+        
+        conversation.convo_holders[body_index]['items'].splice(row_index, 1);
+    })
+
+    $('body').on('click','#edit-convo', function(){
+        var body_index = curr_convo_item.body_index; 
+        var row_index = curr_convo_item.row_index; 
+        conversation.convo_holders[body_index]['items'][row_index]['label'] = $("#editConvoLabel").val();
+        $(".sidebar-transparent").click();
+    });
+</script>
+</body>
+</html>                                          

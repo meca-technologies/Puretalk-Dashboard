@@ -1,0 +1,101 @@
+{% extends "twilio/layout.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+
+<style>
+    .dispo-check{
+        margin-top: 5px;
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">DNC List</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <b>Campaign</b>
+                        <center><img src="/static/img/spinner.svg" id="campaign-body-loading" width="100px"></center>
+                        <select style="display: none;" class="form-control select2 select2-hidden-accessible mt-2 lead-campaigns-dnc" id="campaign-body" name="campaign-body" tabindex="-1" aria-hidden="true" value="{{campaign}}">
+                            <option value="" selected disabled>Select Campaign...</option>
+                            <option value="all">All Campaigns</option>
+                            <option v-for="campaign in campaigns" v-bind:value="campaign.id">[[ campaign.name ]]</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->    
+                <div id="lead-list-table-loading" style="display: none;">
+                    {% with loading_id='', display_me='1' %}
+                    <center>{% include "loading-bars.html" %}</center>
+                    {% endwith %}
+                </div>
+                <div class="table-responsive" id="lead-table" style="display: none;">
+                    <!-- Projects table -->
+                    <table class="table align-items-center table-flush" id="dnc-table" sort-col="9" sort-style="desc" page-length="100">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Reference Number</th>
+                                <th scope="col">Last Disposition</th>
+                                <th scope="col">Interested</th>
+                                <th scope="col">Call Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-body">
+                            <tr v-for='lead in leads'>
+                                <td tabindex="0">[[ lead.id ]]</td>
+                                <td>[[ returnDash(lead.reference_number) ]]</td>
+                                <td>[[ returnDash(lead.status) ]]</td>
+                                <td>
+                                    <span v-if="lead.interested == 'interested'" class="badge badge-success">Interested</span>
+                                    <span v-else-if="lead.interested == 'not_interested'" class="badge badge-danger">Not Interested</span>
+                                    <span v-else>[[ returnDash(lead.interested) ]]</span>
+                                </td>
+                                <td>
+                                    <p><i class="fa fa-stopwatch"></i> [[ lead.time_taken ]] s<br>
+                                        <i class="fa fa-calendar"></i> [[ formatNiceDateTime(lead.updated_at) ]]<br></p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="static/js/vueJS/leadsCampaign.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/campaigns.js?v=1.3.11.1"></script>
+<script>
+    updateCampaigns();
+</script>
+{% endblock %}

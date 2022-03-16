@@ -1,0 +1,282 @@
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="paypal-settings-tab" data-toggle="tab" href="#paypal-settings" role="tab" aria-controls="paypal-settings" aria-selected="true"><i class="fab fa-paypal"></i> Paypal </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="stripe-settings-tab" data-toggle="tab" href="#stripe-settings" role="tab" aria-controls="stripe-settings" aria-selected="false"><i class="fab fa-cc-stripe"></i> Stripe </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="razorpay-settings-tab" data-toggle="tab" href="#razorpay-settings" role="tab" aria-controls="razorpay-settings" aria-selected="false"><img src="https://puretalk.ai/assets/img/razorpay.svg" width="45px"> Razorpay </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="paystack-settings-tab" data-toggle="tab" href="#paystack-settings" role="tab" aria-controls="paystack-settings" aria-selected="false"><img src="https://puretalk.ai/assets/img/paystack.png" width="45px"> Paystack </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="mollie-settings-tab" data-toggle="tab" href="#mollie-settings" role="tab" aria-controls="mollie-settings" aria-selected="false"><img src="https://puretalk.ai/assets/img/mollie.svg" width="35px"> Mollie </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="authorize-settings-tab" data-toggle="tab" href="#authorize-settings" role="tab" aria-controls="authorize-settings" aria-selected="false"><img src="https://puretalk.ai/assets/img/authorize.jpg" width="25px"> Authorize </a>
+    </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="paypal-settings" role="tabpanel" aria-labelledby="paypal-settings-tab">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Paypal Client Id</label>
+                    <input type="text" name="paypal_client_id" class="form-control" v-bind:value="settings.paypal_client_id">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Paypal Secret</label>
+                    <input type="password" name="paypal_secret" class="form-control" v-bind:value="settings.paypal_secret">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Select environment</label>
+                    <select name="paypal_mode" id="paypal_mode" class="form-control">
+                        <option value="sandbox"  selected >Sandbox</option>
+                        <option value="live" >Live</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Webhook Url</label>
+                    <p>https://puretalk.ai/save-paypal-invoices</p>
+                    <small class="form-text text-info">
+                        Add this webhook url on your paypal app settings                                                </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="control-label">Paypal Status</div>
+                    <label class="custom-switch mt-2">
+                        <input type="checkbox" name="paypal_status" class="custom-switch-input"  :checked="settings.paypal_status" >
+                        <span class="custom-switch-indicator"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="stripe-settings" role="tabpanel" aria-labelledby="stripe-settings-tab">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Publishable Key</label>
+                    <input type="text" name="stripe_api_key" class="form-control" v-bind:value="settings.stripe_api_key">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Stripe Secret</label>
+                    <input type="password" name="stripe_api_secret" class="form-control" v-bind:value="settings.stripe_api_secret" placeholder="Stripe Secret Key">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Stripe Webhook Secret</label>
+                    <input type="text" name="stripe_webhook_key" class="form-control" v-bind:value="settings.stripe_webhook_key">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Webhook Url</label>
+                    <p>https://puretalk.ai/save-stripe-invoices</p>
+                    <small class="form-text text-info">
+                        Add this webhook url on your stripe app settings</small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="control-label">Stripe Status</div>
+                    <label class="custom-switch mt-2">
+                        <input type="checkbox" name="stripe_status" class="custom-switch-input" :checked="settings.stripe_status">
+                        <span class="custom-switch-indicator"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="razorpay-settings" role="tabpanel" aria-labelledby="razorpay-settings-tab">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Razorpay Key</label>
+                    <input type="text" name="razorpay_key" class="form-control" v-bind:value="settings.razorpay_key">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Razorpay Secret Key</label>
+                    <input type="password" name="razorpay_secret" class="form-control" v-bind:value="settings.razorpay_secret">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Razorpay Webhook Secret Key</label>
+                    <input type="text" name="razorpay_webhook_secret" class="form-control" v-bind:value="settings.paypal_client_id">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Webhook Url</label>
+                    <p>https://puretalk.ai/save-razorpay-invoices</p>
+                    <small class="form-text text-info">
+                        Add this webhook url on your razorpay app settings                                                </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="control-label">Razorpay Status</div>
+                    <label class="custom-switch mt-2">
+                        <input type="checkbox" name="razorpay_status" class="custom-switch-input"  :checked="settings.razorpay_status" >
+                        <span class="custom-switch-indicator"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="paystack-settings" role="tabpanel" aria-labelledby="paystack-settings-tab">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Paystack Key</label>
+                    <input type="text" name="paystack_client_id" class="form-control" v-bind:value="settings.paystack_client_id">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Paystack Secret Key</label>
+                    <input type="password" name="paystack_secret" class="form-control" v-bind:value="settings.paystack_secret">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label">Paystack merchant email</label>
+                    <input type="text" name="paystack_merchant_email" class="form-control" v-bind:value="settings.paystack_merchant_email">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Webhook Url</label>
+                    <p>https://puretalk.ai/save-paystack-invoices</p>
+                    <small class="form-text text-info">
+                        Add this webhook url on your paystack app settings                                                </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Callback</label>
+                    <p>https://puretalk.ai/admin/paystack-callback</p>
+                    <small class="form-text text-info">
+                        Add this callback url on your paystack app settings                                                </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="control-label">Paystack Status</div>
+                    <label class="custom-switch mt-2">
+                        <input type="checkbox" name="paystack_status" class="custom-switch-input"  :checked="settings.paystack_status" >
+                        <span class="custom-switch-indicator"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="mollie-settings" role="tabpanel" aria-labelledby="mollie-settings-tab">
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label">Mollie Api Key</label>
+                    <input type="text" name="mollie_api_key" class="form-control" v-bind:value="settings.mollie_api_key">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="control-label">Mollie Status</div>
+                    <label class="custom-switch mt-2">
+                        <input type="checkbox" name="mollie_status" class="custom-switch-input"  :checked="settings.mollie_status" >
+                        <span class="custom-switch-indicator"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="authorize-settings" role="tabpanel" aria-labelledby="authorize-settings-tab">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Authorize Api Login Id</label>
+                    <input type="text" name="authorize_api_login_id" class="form-control" v-bind:value="settings.authorize_api_login_id">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Authorize Transaction Key</label>
+                    <input type="text" name="authorize_transaction_key" class="form-control" v-bind:value="settings.authorize_transaction_key">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label">Authorize Signature Key</label>
+                    <input type="text" name="authorize_signature_key" class="form-control" v-bind:value="settings.authorize_signature_key">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Select environment</label>
+                    <select name="authorize_environment" id="authorize_environment" class="form-control">
+                        <option value="sandbox" :selected="settings.paypal_mode === 'isSandbox.sandbox'">Sandbox</option>
+                        <option value="live" :selected="settings.paypal_mode === 'isSandbox.live'">Live</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Webhook Url</label>
+                    <p>https://puretalk.ai/save-authorize-invoices</p>
+                    <small class="form-text text-info">
+                        Add this url on your authorize.net app webhook                                                </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="control-label">Authorize Status</div>
+                    <label class="custom-switch mt-2">
+                        <input type="checkbox" name="authorize_status" class="custom-switch-input"  :checked="settings.authorize_status" >
+                        <span class="custom-switch-indicator"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

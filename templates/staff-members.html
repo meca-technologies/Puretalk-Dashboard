@@ -1,0 +1,199 @@
+{% if session['call_type'] == 'twilio'%}
+    {% extends "twilio/layout.html" %}
+{% else %}
+    {% extends "vicidial/layout.html" %}
+{% endif %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Staff Members</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-modal" id="user-add">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add User</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>First Name</small>
+                    <input id="addUserFName" type="text" class="form-control" placeholder="First Name"><br>
+                </div>
+                <div class="col">
+                    <small>Last Name</small>
+                    <input id="addUserLName" type="text" class="form-control" placeholder="Last Name"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Email</small>
+                    <input id="addUserEmail" type="text" class="form-control" placeholder="Email"><br>
+                </div>
+                <div class="col">
+                    <small>Password</small>
+                    <input id="addUserPassword" type="password" class="form-control" placeholder="campaign Website" value="password"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Profile Image</small>
+                    <input type="text" class="form-control" placeholder="Profile Image"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Contact Number</small>
+                    <input id="addUserContact" type="text" class="form-control" placeholder="Contact Number"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Skype ID</small>
+                    <input id="addUserSkype" type="text" class="form-control" placeholder="Skype ID"><br>
+                </div>
+                <div class="col">
+                    <small>Address</small>
+                    <input id="addUserAddress" type="text" class="form-control" placeholder="Address"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Country</small>
+                    <input id="addUserCountry" type="text" class="form-control" placeholder="Country"><br>
+                </div>
+                <div class="col">
+                    <small>Zip Code</small>
+                    <input id="addUserZip" type="text" class="form-control" placeholder="Zip Code"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>User Roles</small>
+                    <div v-for="role in roles">
+                        <input class="default-forms addUserRoles" v-bind:name="role.id" v-bind:value="role.id" type="checkbox">
+                        <label v-bind:for="role.id">[[ role.name ]]</label>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center mt-4">
+                <a href="#" id="add-user" class="btn btn-success">Save User</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="user-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Edit User</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>First Name</small>
+                    <input id="editUserFName" type="text" class="form-control" placeholder="First Name" v-bind:value="details.first_name"><br>
+                </div>
+                <div class="col">
+                    <small>Last Name</small>
+                    <input id="editUserLName" type="text" class="form-control" placeholder="Last Email" v-bind:value="details.last_name"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Email</small>
+                    <input id="editUserEmail" type="text" class="form-control" placeholder="Email" v-bind:value="details.email"><br>
+                </div>
+                <div class="col">
+                    <small>Password</small>
+                    <input id="editUserPassword" type="password" class="form-control"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Profile Image</small>
+                    <input type="text" class="form-control" placeholder="Profile Image" v-bind:value="details.image"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Contact Number</small>
+                    <input id="editUserContact" type="text" class="form-control" placeholder="Contact Number" v-bind:value="details.contact_number"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Skype ID</small>
+                    <input id="editUserSkypeID" type="text" class="form-control" placeholder="Skype ID" v-bind:value="details.skype_id"><br>
+                </div>
+                <div class="col">
+                    <small>Address</small>
+                    <input id="editUserAddress" type="text" class="form-control" placeholder="Address" v-bind:value="details.address"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Country</small>
+                    <input id="editUserCountry" type="text" class="form-control" placeholder="Country" v-bind:value="details.country"><br>
+                </div>
+                <div class="col">
+                    <small>Zip Code</small>
+                    <input id="editUserZip" type="text" class="form-control" placeholder="Zip Code" v-bind:value="details.zip_code"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>User Roles</small>
+                    <div v-for="role in roles">
+                        <input class="default-forms editUserRoles" v-bind:name="role.id" :checked="returnTrue(details.roles, role)" type="checkbox">
+                        <label v-bind:for="role.id">[[ role.name ]]</label>
+                    </div>
+                </div>
+            </div>
+            <input id="editUserID" type="hidden" v-bind:value="details.id">
+            <hr>
+            <div class="row justify-content-center mt-4">
+                <a href="#" id="edit-user" class="btn btn-success">Save User</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "staff-setup-template.html" %}
+{% endblock %}
+{% block scripts %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js?v=1.5.3"></script>
+<script>
+    var superadmin = 0;
+</script>
+
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="static/js/vueJS/users.js?v=1.3.11.1"></script>
+<script>
+    function returnTrue(roleList, role){
+        for(var i = 0; i<roleList.length; i++){
+            if(roleList[i]['id'] == role['id']){
+                return true;
+            }
+        }
+        return false;
+    }
+</script>
+{% endblock %}

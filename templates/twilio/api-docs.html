@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="PureTalk Dashboard">
+        <meta name="author" content="Creative Tim">
+        <title>{{ companyName }} - {{ pageTitle }}</title>
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" sizes="32x32" href="static/img/favicon.png">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+        <!-- Icons -->
+        <link rel="stylesheet" href="static/vendor/nucleo/css/nucleo.css" type="text/css">
+        <link rel="stylesheet" href="static/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+        <!-- Page plugins -->
+        <!-- Argon CSS -->
+        <link rel="stylesheet" href="static/css/argon.css?v=1.3.11.1" type="text/css">
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+        <link rel="stylesheet" href="static/css/base.css?v=1.3.11.1" type="text/css">
+        <style>
+            *{
+                transition: .3s;
+            }
+            body{
+                overflow-x: hidden;
+            }
+            #api-body::-webkit-scrollbar {
+                width: 10px;
+            }
+            
+            /* Track */
+            #api-body::-webkit-scrollbar-track {
+                box-shadow: inset 0 0 2px grey; 
+                border-radius: 10px;
+            }
+            
+            /* Handle */
+            #api-body::-webkit-scrollbar-thumb {
+                background: #5e72e4  ; 
+                border-radius: 10px;
+            }
+            
+            /* Handle on hover */
+            #api-body::-webkit-scrollbar-thumb:hover {
+                background: #5063cb ; 
+            }
+            .setting-link{
+                background-color: white !important;
+                color: black !important;
+                border-top-left-radius: .375rem !important; 
+                border-top-right-radius: .375rem !important;
+                border-bottom-left-radius: 0 !important; 
+                border-bottom-right-radius: 0 !important;
+            }
+            .setting-link:hover{
+                background-color: white !important;
+                color: black !important;
+                cursor: pointer !important;
+            }
+            .setting-link.active{
+                background: black !important;
+                color: white !important;
+                border-bottom-left-radius: 0 !important; 
+                border-bottom-right-radius: 0 !important;
+            }
+            .setting-link.active:hover{
+                opacity:.8 !important;
+                cursor: pointer !important;
+            }
+            #side-nav-api{
+                list-style:circle;
+                font-weight: 600;
+            }
+            #side-nav-api li{
+                padding: 0.2rem;
+            }
+            #side-nav-api li a{
+                padding: 0.2rem;
+            }
+            #side-nav-api li a.active{
+                background-color: #5e72e4; 
+                color: white;
+            }
+        </style>
+        {% block headScripts %}{% endblock %}
+    </head>
+    <body>
+        <!-- Main content -->
+        <div class="main-content" id="panel">
+            <!-- Topnav -->
+            <nav class="navbar navbar-top navbar-expand navbar-primary bg-primary">
+                <div class="container-fluid">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <div class="sidenav-toggler d-sm-block d-md-none" data-action="sidenav-unpin" data-target="#sidenav-main">
+                            <div class="sidenav-toggler-inner">
+                                <i class="sidenav-toggler-line"></i>
+                                <i class="sidenav-toggler-line"></i>
+                                <i class="sidenav-toggler-line"></i>
+                            </div>
+                        </div>
+                        <!-- Navbar links -->
+                        <ul class="navbar-nav align-items-center ml-md-auto ">
+                        </ul>
+                        <ul class="navbar-nav align-items-center ml-auto ml-md-0  d-none">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <div class="media align-items-center">
+                                        <span class="avatar avatar-sm rounded-circle">
+                                        <img alt="Image placeholder" src="static/img/profile/{% if session['user']['image'] %}{{session['user']['image']}}{% else %}default.png{% endif %}">
+                                        </span>
+                                        <div class="media-body  ml-2  d-none d-lg-block">
+                                            <span class="mb-0 text-sm  font-weight-bold text-white">{{session['user']['first_name']}} {% if session['user']['last_name'] %}{{session['user']['last_name']}}{% endif %}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="dropdown-menu  dropdown-menu-right">
+                                    <a href="/logout" class="dropdown-item">
+                                    <i class="ni ni-user-run"></i>
+                                    <span>Logout</span>
+                                    </a>
+                                    <a href="/switch-company" class="dropdown-item">
+                                    <i class="ni ni-curved-next"></i>
+                                    <span>Switch Company</span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <section class="row">
+                <div class="col-md-3 col-sm-12 p-4">
+                    <br>
+                    <nav>
+                        <ul id="side-nav-api">
+                            <li><a class="scroll-to-api" data-target="top-api" href="#">Webhook Setup</a></li>
+                            <ul>
+                                <li><a class="scroll-to-api" data-target="dashboard-api" href="#" class="active">Dashboard Webhook Setup</a></li>
+                                <li><a class="scroll-to-api" data-target="client-api" href="#">Client Webhook Setup</a></li>
+                            </ul>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-md-9 col-sm-12 row border-left" id="api-body" style="max-height: 90vh; overflow-y: scroll; overflow-x: hidden;">
+                    <br>
+                    <div class="col-12">
+                        <h1 class="display-2 ml-2" id="top-api">Setting up lead generation</h1>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 mt-4 border-md-right">
+                        <div class="col border p-3 bg-white ml-2" id="dashboard-api" style="border-radius:.375rem;">
+                            <h2>Setup webhooks in your dashboard</h2>
+                            <p>To start your lead generation we first need to setup a webhook on the Puretalk dashboard.</p>
+                            <ol>
+                                <li>Login to your company and go to <i class="ni ni-settings-gear-65"></i>Settings > Form Builder</li>
+                                <li class="mt-2">Create or edit an existing</li>
+                                <li class="mt-2">Under the settings of your form you will see "Webhook Setup"<br><br>
+                                    <img width="80%" src="static/img/webhook-setup.png">
+                                </li>
+                                <li class="mt-2">First we need to setup the URL of where leads will be coming from<br><i>(This works as a whitelist for us to allow you to generate leads)</i></li>
+                                <li class="mt-2">Set your preference of sending the data over whether it is JSON or Form Data</li>
+                                <li class="mt-2">Associate your form fields with with the data you will be sending over</li>
+                                <li class="mt-2">Lastly go to your campaign and copy the token <i>(You will need this later)</i></li>
+                            </ol>
+                        
+                            <h2 id="client-api">Setup webhooks on your end</h2>
+                            <h3>Request URL</h3>
+                            <p>Puretalk AI supports a basic token authentication along with a whitelist to improve security. 
+                                In order to generate leads you will need to POST from your whitelisted URL to the following URL format.</p>
+                            <pre class="card" style="background-color: black; color: #fff;">
+                                <code>
+    1|   POST https://dashboard.puretalk.ai/leads/generator/&lt;token&gt;
+                                </code>
+                            </pre>
+                            
+                            <h3>Request Body</h3>
+                            <p>In your request you will need to put in associate your lead generation fields with the form fields you setup earlier.</p>
+                            <i>*Note: you are required to send over a phone number otherwise the generation will return a failure for you</i>
+                            <br>
+                            <br>
+                            <h3>Return Body</h3>
+                            <p>Returns your newly created lead</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 mt-4">
+                        <div class="card bg-dark text-white ml-2 p-4">
+                            <p>Request URL</p>
+                            <pre class="card" style="background-color: black; color: #fff;">
+                                <code>
+    1|   POST https://dashboard.puretalk.ai/leads/generator/&lt;token&gt;
+                                </code>
+                            </pre>
+                            <p class="mt-4">Request Body</p>
+                            <div class="row pl-3">
+                                <div class="col-md-3 col-sm-6 border-left border-top border-right p-2 setting-link active" style="width: auto;" tab-group="requests" tab-target="request-json">JSON</div>
+                                &nbsp;
+                                <div class="col-md-3 col-sm-6 border-left border-top border-right p-2 setting-link" style="width: auto;" tab-group="requests" tab-target="request-form">Form Data</div>
+                            </div>
+                            <pre class="card" style="background-color: black; color: #fff;" tab-parent="requests" id="request-json">
+                                <code>
+    1|   { 
+    2|       "first_name": "John",  
+    3|       "last_name": "Smith",
+    4|       "phone": "(123) 456-7890"
+    5|   } 
+                                </code>
+                            </pre>
+                            <pre class="card" style="background-color: black; color: #fff; display: none;" tab-parent="requests" id="request-form">
+                                <code>
+    1|   first_name:John  
+    2|   last_name:Smith
+    3|   phone:(123) 456-7890
+                                </code>
+                            </pre>
+                            <p class="mt-4">Return Body</p>
+                            <div class="row pl-3">
+                                <div class="col-md-3 col-sm-6 border-left border-top border-right p-2 setting-link active" style="width: auto;" tab-group="returns" tab-target="return-success">Success</div>
+                                &nbsp;
+                                <div class="col-md-3 col-sm-6 border-left border-top border-right p-2 setting-link" style="width: auto;" tab-group="returns" tab-target="return-failure">Failure</div>
+                            </div>
+                            <pre class="card" style="background-color: black; color: #fff;" tab-parent="returns" id="return-success">
+                                <code>
+    1|   { 
+    2|       "data": {
+    3|           "call_logs": [], 
+    4|           "campaign_id": "6144XXXXXXXXXXXXXXXXXXXX", 
+    5|           "created_at": "2021-09-21 14:25:16.736", 
+    6|           "first_actioned_by": null, 
+    7|           "id": "6149XXXXXXXXXXXXXXXXXXXX", 
+    8|           "interested": null,  
+    9|           "last_actioned_by": null,  
+   10|           "lead_data": [  
+   11|               {  
+   12|                   "field_name": "First Name",  
+   13|                   "field_value": "John"  
+   14|               },  
+   15|               {  
+   16|                   "field_name": "Last Name",  
+   17|                   "field_value": "Smith"  
+   18|               },  
+   19|               {  
+   20|                   "field_name": "Phone No",  
+   21|                   "field_value": "(123) 456-7890"  
+   22|               }  
+   23|           ],  
+   24|           "reference_number": "+11234567890",  
+   25|           "status": "unactioned",  
+   26|           "time_taken": null,  
+   27|           "updated_at": "2021-09-21 14:25:16.736"  
+   28|       },  
+   29|       "message": "success"  
+   30|   }  
+                                </code>
+                            </pre>
+                            <pre class="card" style="background-color: black; color: #fff; display: none;" tab-parent="returns" id="return-failure">
+                                <code>
+    1|   { 
+    2|       "data": {},  
+   29|       "message": "failure"  
+   30|   }  
+                                </code>
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </body>
+    
+    <script src="static/vendor/jquery/dist/jquery.min.js"></script>
+    <script src="static/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="static/vendor/js-cookie/js.cookie.js"></script>
+    <script src="static/vendor/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="static/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
+    <!-- Argon JS -->
+    <script src="static/js/argon.js?v=1.3.11.1"></script>
+    <script src="static/js/base.js?v=1.3.11.1"></script>
+    <script src="static/js/sidebar.js?v=1.3.11.1"></script>
+    <script src="static/js/tabs.js?v=1.3.11.1"></script>
+    <script src="static/js/scrolltotarget.js?v=1.3.11.1"></script>
+    <script>
+        setTimeout(function(){
+            var backdrops = document.getElementsByClassName("backdrop");
+            for(var i = 0; i<backdrops.length; i++){
+                backdrops[i].remove();
+            }
+        }, 100)
+    </script>
+</html>

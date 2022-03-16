@@ -1,0 +1,49 @@
+.puretalk-label{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+.puretalk-form{
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    display: block;
+    width: 100%;
+    height: calc(1.5em + 1.25rem + 2px);
+    padding: 0.625rem 0.75rem;
+    transition: all .15s cubic-bezier(.68,-.55,.265,1.55);
+    color: #8898aa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    background-clip: padding-box;
+    box-shadow: 0 3px 2px rgb(233 236 239 / 5%);
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+.puretalk-form:focus{
+    color: #8898aa;
+    border-color: #5e72e4;
+    outline: 0;
+    background-color: #fff;
+    box-shadow: 0 3px 9px rgb(50 50 9 / 0%), 3px 4px 8px rgb(94 114 228 / 10%);
+}
+.puretalk-submit{
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.5;
+    display: inline-block;
+    padding: 0.625rem 1.25rem;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    text-align: center;
+    vertical-align: middle;
+    color: #525f7f;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    background-color: transparent;
+    color: #fff;
+    border-color: #5e72e4;
+    background-color: #5e72e4;
+    box-shadow: 0 4px 6px rgb(50 50 93 / 11%), 0 1px 3px rgb(0 0 0 / 8%);
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}

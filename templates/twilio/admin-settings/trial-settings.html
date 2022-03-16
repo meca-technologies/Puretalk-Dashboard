@@ -1,0 +1,103 @@
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="name" class="required">Name</label>
+        <input type="text" class="form-control" id="name" name="name" value="Trial">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="max_employees" class="required">Max Employees</label>
+        <input type="number" class="form-control" id="max_employees" name="max_employees" value="20">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="no_of_days" class="required">Number Of Days</label>
+        <input type="text" class="form-control" id="no_of_days" name="no_of_days" value="300">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="notification_before">Notification Before Days</label>
+        <input type="number" class="form-control" id="notification_before" name="notification_before" value="10">
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-group col-md-12">
+        <label for="trial_message">Trial Message shown on front page</label>
+        <input type="text" class="form-control" id="trial_message" name="trial_message" value="Start 30 days free trial">
+    </div>
+</div>
+
+<h5 class="box-title text-dark mt-4 fs-13"><b>Storage</b></h5>
+<hr>
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="max_storage_size" class="required">Max Storage Size</label>
+        <input type="text" class="form-control" id="max_storage_size" name="max_storage_size" value="200">
+        <small id="passwordHelpBlock" class="form-text text-muted">
+            Set -1 for unlimited storage size                                    </small>
+    </div>
+    <div class="form-group col-md-6">
+        <label for="storage_unit" class="required">Storage Unit</label>
+        <select name="storage_unit" id="storage_unit" class="form-control">
+            <option value="mb">MB</option>
+            <option value="gb">GB</option>
+        </select>
+    </div>
+</div>
+
+<h5 class="box-title text-dark mt-4 fs-13"><b>Select Modules</b></h5>
+<hr>
+
+
+<div class="form-group form-row mb-4">
+    <div class="col-sm-12 col-md-12">
+        <div class="row">
+                                                        <div class="col-3 col-md-3 col-lg-3 mb-3">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="module_sales_members" name="modules[sales_members]" value="Sales Members" checked="">
+                        <label class="custom-control-label" for="module_sales_members">Sales Members</label>
+                    </div>
+                </div>
+                                                        <div class="col-3 col-md-3 col-lg-3 mb-3">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="module_import_leads" name="modules[import_leads]" value="Import Leads" checked="">
+                        <label class="custom-control-label" for="module_import_leads">Import Leads</label>
+                    </div>
+                </div>
+                                                        <div class="col-3 col-md-3 col-lg-3 mb-3">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="module_export_leads" name="modules[export_leads]" value="Export Leads" checked="">
+                        <label class="custom-control-label" for="module_export_leads">Export Leads</label>
+                    </div>
+                </div>
+                                                        <div class="col-3 col-md-3 col-lg-3 mb-3">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="module_email_templates" name="modules[email_templates]" value="Email Templates" checked="">
+                        <label class="custom-control-label" for="module_email_templates">Email Templates</label>
+                    </div>
+                </div>
+                                                        <div class="col-3 col-md-3 col-lg-3 mb-3">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="module_follow_up_call" name="modules[follow_up_call]" value="Follow Up Calls" checked="">
+                        <label class="custom-control-label" for="module_follow_up_call">Follow Up Calls</label>
+                    </div>
+                </div>
+                                                        <div class="col-3 col-md-3 col-lg-3 mb-3">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="module_appointments" name="modules[appointments]" value="Appointments" checked="">
+                        <label class="custom-control-label" for="module_appointments">Appointments</label>
+                    </div>
+                </div>
+                                                </div>
+        <input type="hidden" class="form-control" id="plan_modules" name="plan_modules" value="">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        <div class="control-label">Status</div>
+        <label class="custom-switch mt-2">
+            <input type="checkbox" name="status" class="custom-switch-input" value="on" checked="">
+            <span class="custom-switch-indicator"></span>
+        </label>
+    </div>
+</div>

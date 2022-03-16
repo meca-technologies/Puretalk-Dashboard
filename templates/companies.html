@@ -1,0 +1,300 @@
+{% extends "layout-admin.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+{% endblock %}
+{% block body %}
+<style>
+    .custom-switch{
+        padding-left: 0 !important;
+    }
+</style>
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Companies</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#company-add" class="sidebar-toggle btn btn-info"><span style="font-weight: 1000;">+</span> Add New Company</a>
+    </div>
+    <div class="col-xl-12 mt-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Companies</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush" id="company-body" sort-col="3" sort-style="desc" page-length="-1">
+                    <thead class="thead-light">
+                        <tr>
+                            <!--<th scope="col" class="d-none">ID</th>-->
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Details</th>
+                            <th scope="col">Phone</th>
+                            <th scope="col">Login Into Account</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for company in companies %}
+                        <tr>
+                            <!--<td scope="row" class="d-none">{{ company.id }}</td>-->
+                            <td>{{ company.name }}<br><img src="{{ company.logo }}" class="img-responsive" style="max-height: 35px"></td>
+                            <td>{{ company.email }}</td>
+                            <td>
+                                {% if company.status == 'active' %}<span class="badge badge-success">Active</span>
+                                {% else %}<span class="badge badge-danger">{{ company.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <ul>
+                                    <li class="d-none">Verified: <i class="fa fa-check-circle" style="color: green;"></i></li>
+                                    <li>Register Date: {{ company.created_at }}</li>
+                                    <li>Total Users: {{ company.total_users }}</li>
+                                </ul>
+                            </td>
+                            <td>{{ company.phone }}</td>
+                            <td>
+                                <div class="buttons">
+                                    <button company-id="{{ company.id }}" twilio-enabled="{{ company.twilio_enabled }}" vicidial-enabled="{{ company.vici_enabled }}" class="btn btn-info icon-left login-company" data-toggle="tooltip">Login</button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#company-edit" class="sidebar-toggle btn btn-info btn-icon icon-left company-edit" company-id="{{ company.id }}" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <a href="#twilio-edit" class="sidebar-toggle btn btn-success btn-icon icon-left twilio-edit" company-id="{{ company.id }}" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-phone" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left company-delete" company-id="{{ company.id }}" data-toggle="modal" data-target="#company-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div> 
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="twilio-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4" style="width: 600px;">
+        <div class="sidebar-header" id="twilio-body">
+            <h2>Call Settings</h2>
+            <hr>
+            {% include "settings/call-settings.html" %}
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="company-add">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add Company</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Company Name</small>
+                    <input type="text" class="form-control" placeholder="Company Name" id="addCompanyName" v-bind:value="details.name">
+                </div>
+                <div class="col">
+                    <small>Company Email</small>
+                    <input type="text" class="form-control" id="addCompanyEmail" placeholder="Company Email" v-bind:value="details.email">
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <small>Company Phone</small>
+                    <input type="text" class="form-control" id="addCompanyPhone" placeholder="Company Phone" v-bind:value="details.phone"><br>
+                </div>
+                <div class="col">
+                    <small>Company Website</small>
+                    <input type="text" class="form-control" id="addCompanyWebsite" placeholder="Company Website" v-bind:value="details.website"><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Company Logo</small>
+                    <input type="text" class="form-control" placeholder="Company Logo" v-bind:value="details.logo"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Company Address</small>
+                    <textarea class="form-control" id="addCompanyAddress" v-bind:value="details.address"></textarea><br>
+                </div>
+            </div>
+            <div class="row d-none">
+                <div class="col">
+                    <small>Locale</small>
+                    <select class="form-control" id="addCompanyLocale" placeholder="Locale">
+                        <option value="en">en</option>
+                    </select><br>
+                </div>
+                <div class="col">
+                    <small>Status</small>
+                    <select class="form-control" id="addCompanyStatus" placeholder="Locale">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select><br>
+                </div>
+            </div>
+            {% if session['user']['user_id'] == '613b8a785a2cd24ac1a33bc0' %}
+            <div class="row">
+                <div class="col">
+                    <small>Generate Twilio Account</small>
+                    <input type="checkbox" id="gen-twilio-account">
+                </div>
+            </div>
+            {% endif %}
+            <div class="row mt-4">
+                <div class="col">
+                    <small>Twilio Account</small>
+                    <select class="form-control" id="addCompanyTwilio">
+                        {% for company in companies|sort(attribute='name') %}
+                            {% if company.twilio_enabled and company.twilio_account_sid and company.twilio_auth_token%}
+                                <option value="{{company.id}}" twilio_account_sid="{{company.twilio_account_sid}}" twilio_auth_token="{{company.twilio_auth_token}}">{{ company.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <a href="#" id="add-company" class="btn btn-success">Add New Company</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="company-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.name ]]</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>Company Name</small>
+                    <input type="text" id="editCompanyName" class="form-control" placeholder="Company Name" v-bind:value="details.name"><br>
+                    <input type="hidden" id="editCompanyID" class="form-control" placeholder="Company Name" v-bind:value="details.id"><br>
+                </div>
+                <div class="col">
+                    <small>Company Email</small>
+                    <input type="text" id="editCompanyEmail" class="form-control" placeholder="Company Email" v-bind:value="details.email"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Company Phone</small>
+                    <input type="text" id="editCompanyPhone" class="form-control" placeholder="Company Phone" v-bind:value="details.phone"><br>
+                </div>
+                <div class="col">
+                    <small>Company Website</small>
+                    <input type="text" id="editCompanyWebsite" class="form-control" placeholder="Company Website" v-bind:value="details.website"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Company Logo</small>
+                    <input type="text" id="editCompanyLogo" class="form-control d-none" placeholder="Company Logo" v-bind:value="details.logo"><br>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="companyLogoFile" lang="en">
+                        <label class="custom-file-label" for="companyLogoFile"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <small>Company Address</small>
+                    <textarea id="editCompanyAddress" class="form-control" v-bind:value="details.address"></textarea><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Locale</small>
+                    <input type="text" class="form-control" placeholder="Locale"><br>
+                </div>
+                <div class="col">
+                    <small>Status</small>
+                    <input type="text" class="form-control" placeholder="Status"><br>
+                </div>
+            </div><br>
+            <b class="mt-4">Billing</b>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <div class="custom-control custom-radio mb-3">
+                        <input name="custom-radio-1" class="custom-control-input" id="charge-minutes" type="radio" :checked="details['charge_type'] == 0">
+                        <label class="custom-control-label" for="charge-minutes">Charge by minutes</label>
+                    </div>
+                    <div class="custom-control custom-radio mb-3">
+                        <input name="custom-radio-1" class="custom-control-input" id="charge-pickups" type="radio" :checked="details['charge_type'] == 1">
+                        <label class="custom-control-label" for="charge-pickups">Charge by pickups</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Charge Amount</small>
+                    <input type="number" id="charge-amount" class="form-control" min="0" max="100" v-bind:value="details['charge_amount']">
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <a href="#" id="edit-company" class="btn btn-success">Save Company</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="company-delete" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-bell-55 ni-3x"></i>
+                    <h4 class="heading mt-4">Are you sure you want to delete this company?</h4>
+                    <p>This cannot be undone</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="company-delete-conf" data-dismiss="modal">Yes, DELETE it</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/tabs.js?v=1.3.11.1"></script>
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="static/js/vueJS/callsettings.js?v=1.3.11.1"></script>
+
+<script src="static/js/vueJS/companies.js?v=1.3.11.1"></script>
+{% endblock %}

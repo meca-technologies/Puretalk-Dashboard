@@ -1,0 +1,124 @@
+{% extends "vicidial/layout.html" %}
+{% block headScripts%}
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Import Leads</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div id="lead-import-loading" style="display: none;">
+                <center>
+                    <img src="/static/img/spinner.svg" width="100px">
+                    <i>Importing Leads</i>
+                </center>
+            </div>
+            <div class="card-header border-0" id="lead-import-card">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Import Leads To List</h3>
+                        <p>Choose whether to upload your leads OR copy and paste them from Microsoft excel. We'll automatically remove duplicate entries for you and help you sort the data in the next step.</p>
+                        <hr>
+                    </div>
+                </div>
+                <div class="card-body accordion" id="accordionExample">
+                    <div class="form-group row mb-4">
+                        <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Select List</label>
+                        <div class="col-sm-12 col-md-8">
+                            <select class="form-control select2 select2-hidden-accessible" id="list-body" name="list-body" tabindex="-1" aria-hidden="true">
+                                <option value="">Select List...</option>
+                                <option v-for="list in lists" v-bind:value="list.list_id">[[ list.list_name ]]</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-4 d-none">
+                        <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Select Import Type</label>
+                        <div class="col-sm-12 col-md-5">
+                            <div class="selectgroup w-100">
+                                <ul class="nav nav-tabs border-0">
+                                    <li class="active"><a data-toggle="tab" class="btn btn-primary active" href="#home">By Text</a></li>
+                                    <li><a data-toggle="tab" class=" ml-4 btn btn-primary" href="#menu1">By CSV File</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content">
+                        <center>
+                            <div id="home" class="tab-pane fade in active d-none">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Copy/Paste from excel or TXT file</label>
+                                <div class="col-sm-12 col-md-8">
+                                    <textarea class="form-control" id="import_text" name="import_text" style="height: auto;"></textarea>
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade show">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Upload CSV File</label>
+                                <div class="col-sm-12 col-md-8">
+                                    <input class="form-control" type="file" id="import_file" name="import_file" accept=".csv">
+                                </div>
+                                <h3 class="mt-4">Please Define Your Columns</h3>
+                                <hr>
+                                <div class="col-sm-12 col-md-8" id="form-details">
+                                    <div class="row mt-4" v-for="detail in fullDetails">
+                                        <div class="col-6" style="text-align: right;">
+                                            [[ detail.column_name ]]
+                                        </div>
+                                        <div class="col-6">
+                                            <select class="form-control form-layout">
+                                                <option value="skip" selected disabled>Please Select A Field</option>
+                                                <option value="notUsed">- Not Used -</option>
+                                                <option value="VENDOR LEAD CODE" :selected="detail.column_name === 'VENDOR LEAD CODE'">VENDOR LEAD CODE</option>
+                                                <option value="SOURCE ID"        :selected="detail.column_name === 'SOURCE ID'">SOURCE ID</option>
+                                                <option value="PHONE CODE"       :selected="detail.column_name === 'PHONE CODE'">PHONE CODE</option>
+                                                <option value="PHONE NUMBER"     :selected="detail.column_name === 'PHONE NUMBER'">PHONE NUMBER</option>
+                                                <option value="TITLE"            :selected="detail.column_name === 'TITLE'">TITLE</option>
+                                                <option value="FIRST NAME"       :selected="detail.column_name === 'FIRST NAME'">FIRST NAME</option>
+                                                <option value="MIDDLE INITIAL"   :selected="detail.column_name === 'MIDDLE INITIAL'">MIDDLE INITIAL</option>
+                                                <option value="LAST NAME"        :selected="detail.column_name === 'LAST NAME'">LAST NAME</option>
+                                                <option value="ADDRESS1"         :selected="detail.column_name === 'ADDRESS1'">ADDRESS1</option>
+                                                <option value="ADDRESS2"         :selected="detail.column_name === 'ADDRESS2'">ADDRESS2</option>
+                                                <option value="ADDRESS3"         :selected="detail.column_name === 'ADDRESS3'">ADDRESS3</option>
+                                                <option value="CITY"             :selected="detail.column_name === 'CITY'">CITY</option>
+                                                <option value="STATE"            :selected="detail.column_name === 'STATE'">STATE</option>
+                                                <option value="PROVINCE"         :selected="detail.column_name === 'PROVINCE'">PROVINCE</option>
+                                                <option value="POSTAL CODE"      :selected="detail.column_name === 'POSTAL CODE'">POSTAL CODE</option>
+                                                <option value="COUNTRY CODE"     :selected="detail.column_name === 'COUNTRY CODE'">COUNTRY CODE</option>
+                                                <option value="GENDER"           :selected="detail.column_name === 'GENDER'">GENDER</option>
+                                                <option value="DATE OF BIRTH"    :selected="detail.column_name === 'DATE OF BIRTH'">DATE OF BIRTH</option>
+                                                <option value="ALT PHONE"        :selected="detail.column_name === 'ALT PHONE'">ALT PHONE</option>
+                                                <option value="EMAIL"            :selected="detail.column_name === 'EMAIL'">EMAIL</option>
+                                                <option value="SECURITY PHRASE"  :selected="detail.column_name === 'SECURITY PHRASE'">SECURITY PHRASE</option>
+                                                <option value="COMMENTS"         :selected="detail.column_name === 'COMMENTS'">COMMENTS</option>
+                                                <option value="RANK"             :selected="detail.column_name === 'RANK'">RANK</option>
+                                                <option value="OWNER"            :selected="detail.column_name === 'OWNER'">OWNER</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 mt-4">
+                                    <center><a href="#" id="importCSV" class="btn btn-primary">Process CSV Data</a></center>
+                                </div>
+                            </div>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/listsV2.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/formbuilderV2.js?v=1.3.11.1"></script>
+{% endblock %}

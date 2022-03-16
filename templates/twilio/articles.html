@@ -1,0 +1,153 @@
+{% extends "layout-admin.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Articles</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#article-new" class="sidebar-toggle btn btn-info"><span style="font-weight: 1000;">+</span> Add New Article</a>
+    </div>
+    <div class="col-xl-12 mt-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Articles</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Image</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Created At</th>
+                            <th scope="col">Updated At</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="article-body">
+                        <tr v-for="article in articles">
+                            <th scope="row">[[ article.id ]]</th>
+                            <td><img v-bind:src="article.image" width="50" height="50"></td>
+                            <td>[[ article.user_first_name ]] [[ article.user_last_name ]]</td>
+                            <td>[[ article.title ]]</td>
+                            <td>
+                                <span v-if="article.status == 1" class="badge badge-success" style="cursor: pointer;" data-toggle="tooltip" data-original-title="Click To Switch Status" data-id="26" data-url="https://puretalk.ai/super-admin/articles/switch/26">Active</span>
+                                <span v-else class="badge badge-danger" style="cursor: pointer;" data-toggle="tooltip" data-original-title="Click To Switch Status" data-id="26" data-url="https://puretalk.ai/super-admin/articles/switch/26">Inactive</span>
+                            </td>
+                            <td>[[ article.created_at ]]</td>
+                            <td>[[ article.updated_at ]]</td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#article-edit" class="sidebar-toggle btn btn-info btn-icon icon-left article-edit" data-toggle="tooltip" data-original-title="Edit" v-bind:article-id="article.id"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button onclick="deleteModal(1)" class="btn btn-danger btn-icon icon-left" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="article-new">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4" style="width: 90vw;">
+        <div class="sidebar-header">
+            <h2>Add New Article</h2>
+            <hr>
+            <small>Article Title</small>
+            <input type="text" id="add-article-title" class="form-control" placeholder="Article Title"><br>
+            <div id="summernote-new">Article Body</div>
+            <div class="dropzone dropzone-single mt-4" data-toggle="dropzone" data-dropzone-url="http://">
+              <div class="fallback">
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="projectCoverUploads">
+                  <label class="custom-file-label" for="projectCoverUploads">Choose file</label>
+                </div>
+              </div>
+              <div class="dz-preview dz-preview-single">
+                <div class="dz-preview-cover">
+                  <img class="dz-preview-img" src="..." alt="..." data-dz-thumbnail>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <button id="add-article" class="col-12 btn btn-primary">Save Article</button>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="article-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4" style="width: 90vw;">
+        <div class="sidebar-header">
+            <h2>[[ details.title ]]</h2>
+            <hr>
+            <small>Article Title</small>
+            <input type="text" class="form-control" id="edit-article-title" placeholder="Article Title" v-bind:value="details.title"><br>
+            <div id="summernote">[[ details.body ]]</div>
+            <div id="dropzone-component" class="tab-pane tab-example-result fade show active mt-4" role="tabpanel" aria-labelledby="dropzone-component-tab">
+                <div class="dropzone dropzone-single" data-toggle="dropzone" data-dropzone-url="http://">
+                    <div class="fallback">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="dropzoneBasicUpload" />
+                            <label class="custom-file-label" for="dropzoneBasicUpload">Choose file</label>
+                        </div>
+                    </div>
+                    <div class="dz-preview dz-preview-single">
+                        <div class="dz-preview-cover">
+                            <img class="dz-preview-img" v-bind:src="details.image" v-bind:data-dz-thumbnail="details.image" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <button id="edit-article" class="col-12 btn btn-primary">Save Article</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/articles.js?v=1.3.11.1"></script>
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#summernote-new').summernote();
+        $('#summernote').summernote();
+    });
+</script>
+<script src="https://demos.creative-tim.com/argon-dashboard-pro/assets/vendor/dropzone/dist/min/dropzone.min.js"></script>
+<script type="text/javascript">
+
+    Dropzone.autoDiscover = false;
+ 
+    $(document).ready(function () {
+         $("#id_dropzone").dropzone({
+             maxFiles: 2000,
+             url: "/ajax_file_upload_handler/",
+             success: function (file, response) {
+                 console.log(response);
+             }
+         });
+    })
+    
+ </script>
+{% endblock %}

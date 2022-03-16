@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="PureTalk Dashboard">
+  <meta name="author" content="Creative Tim">
+  <title>{{ companyName }} - {{ pageTitle }}</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="static/img/favicon.png">
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+  <!-- Icons -->
+  <link rel="stylesheet" href="static/vendor/nucleo/css/nucleo.css" type="text/css">
+  <link rel="stylesheet" href="static/vendor/@fortawesome/fontawesome-free/css/all.min.css" type="text/css">
+  <!-- Page plugins -->
+  <!-- Argon CSS -->
+  <link rel="stylesheet" href="static/css/argon.min.css?v=1.3.11.1" type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+  
+  <link rel="stylesheet" href="static/css/loading.css?v=1.3.11.1" type="text/css">
+  <link rel="stylesheet" href="static/css/base.css?v=1.3.11.1" type="text/css">
+  {% block headScripts %}{% endblock %}
+  <style>
+    .avatar{
+      background-image: url("static/img/profile/{% if session['user']['image'] %}{{session['user']['image']}}{% else %}default.png{% endif %}");
+      background-size: 100% 100%;
+      background-position: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sidenav -->
+  <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
+    <div class="scrollbar-inner">
+      <!-- Brand -->
+      <div class="sidenav-header  d-flex  align-items-center">
+        <a class="navbar-brand" href="/">
+          <img src="static/img/brand/{% if session['company']['logo'] %}{{ session['company']['logo'] }}{% else %}default.png{% endif %}" class="navbar-brand-img" style="max-height: 1000px;" width="100%" alt="...">
+        </a>
+        <div class=" ml-auto ">
+          <!-- Sidenav toggler -->
+          <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-unpin" data-target="#sidenav-main">
+            <div class="sidenav-toggler-inner">
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="navbar-inner">
+        <!-- Collapse -->
+        <div class="collapse navbar-collapse" id="sidenav-collapse-main">
+          <!-- Nav items -->
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link  {% if navPosition == 'index' %}active{% endif %}" href="/">
+                <i class="ni ni-shop text-primary"></i>
+                <span class="nav-link-text">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item d-none">
+              <a class="nav-link {% if navPosition == 'ai-agents' %}active{% endif %}" href="/ai-agents">
+                <i class="ni ni-circle-08 text-primary"></i>
+                <span class="nav-link-text">AI Agents</span>
+              </a>
+            </li>
+            {% if session['permission_sets'][session['company']['id']]['613b89ed3e1f2f627b4892fc'] %}
+            <li class="nav-item">
+              <a class="nav-link" href="#campaign-manager" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-components">
+                <i class="ni ni-mobile-button text-primary"></i>
+                <span class="nav-link-text">Campaign Management</span>
+              </a>
+              <div class="collapse {% if navTab == 'campaign-manager' %}show{% endif %}" id="campaign-manager">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item">
+                    <a href="/call-manager" class="nav-link {% if navPosition == 'call-manager' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> CM </span>
+                      <span class="sidenav-normal"> Call Manager </span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/campaigns" class="nav-link {% if navPosition == 'campaigns' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> C </span>
+                      <span class="sidenav-normal"> Campaigns </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="#lead-manager" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-components">
+                <i class="ni ni-mobile-button text-primary"></i>
+                <span class="nav-link-text">Lead Management</span>
+              </a>
+              <div class="collapse {% if navTab == 'lead-manager' %}show{% endif %}" id="lead-manager">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item">
+                    <a href="/leads" class="nav-link {% if navPosition == 'leads' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> CH </span>
+                      <span class="sidenav-normal"> Call History </span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/lists" class="nav-link {% if navPosition == 'lists' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> L </span>
+                      <span class="sidenav-normal"> Lists </span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/leads-list" class="nav-link {% if navPosition == 'leads-list' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> L </span>
+                      <span class="sidenav-normal"> Leads </span>
+                    </a>
+                  </li>
+                  {% if session['permission_sets'][session['company']['id']]['613b89ed3e1f2f627b4892f9'] %}
+                  <li class="nav-item">
+                    <a href="/import-leads" class="nav-link {% if navPosition == 'import-leads' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> IL </span>
+                      <span class="sidenav-normal"> Import Leads </span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  {% if session['permission_sets'][session['company']['id']]['613b89ed3e1f2f627b4892fa'] %}
+                  <li class="nav-item">
+                    <a href="/export-leads" class="nav-link {% if navPosition == 'export-leads' %}active{% endif %}">
+                      <span class="sidenav-mini-icon bg-grey rounded shadow"> EL </span>
+                      <span class="sidenav-normal"> Export Leads </span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  <li class="nav-item d-none">
+                    <a href="/import-caller-ids" class="nav-link {% if navPosition == 'import-caller-ids' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> IC </span>
+                      <span class="sidenav-normal"> Import Caller IDs </span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="/caller-ids" class="nav-link {% if navPosition == 'caller-ids' %}active{% endif %}">
+                      <span class="sidenav-mini-icon rounded shadow"> IC </span>
+                      <span class="sidenav-normal"> Caller IDs </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item d-none">
+              <a class="nav-link" href="#navbar-forms" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-forms">
+                <i class="ni ni-calendar-grid-58 text-primary"></i>
+                <span class="nav-link-text">Appointments</span>
+              </a>
+              <div class="collapse {% if navTab == 'appointments' %}show{% endif %}" id="navbar-forms">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item {% if navPosition == 'follow-up-calls' %}active{% endif %}">
+                    <a href="/follow-up-calls" class="nav-link">
+                      <span class="sidenav-mini-icon"> F </span>
+                      <span class="sidenav-normal"> Follow Up Calls </span>
+                    </a>
+                  </li>
+                  <li class="nav-item d-none">
+                    <a href="/appointment-calendar" class="nav-link">
+                      <span class="sidenav-mini-icon"> A </span>
+                      <span class="sidenav-normal"> Appointment Calendar </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#navbar-users" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-users">
+                <i class="ni ni-circle-08 text-primary"></i>
+                <span class="nav-link-text">User Management</span>
+              </a>
+              <div class="collapse {% if navTab == 'user-management' %}show{% endif %}" id="navbar-users">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item {% if navPosition == 'staff-members' %}active{% endif %}">
+                    <a href="/staff-members" class="nav-link">
+                      <span class="sidenav-mini-icon"> SS </span>
+                      <span class="sidenav-normal"> Staff Setup </span>
+                    </a>
+                  </li>
+                  <li class="nav-item {% if navPosition == 'roles' %}active{% endif %}">
+                    <a href="/roles" class="nav-link">
+                      <span class="sidenav-mini-icon"> RS </span>
+                      <span class="sidenav-normal"> Role Setup </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#navbar-maps" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="navbar-maps">
+                <i class="ni ni-settings-gear-65 text-primary"></i>
+                <span class="nav-link-text">Settings</span>
+              </a>
+              <div class="collapse" id="navbar-maps">
+                <ul class="nav nav-sm flex-column">
+                  <li class="nav-item {% if navPosition == 'billing' %}active{% endif %}">
+                    <a href="/billing" class="nav-link">
+                      <span class="sidenav-mini-icon"> B </span>
+                      <span class="sidenav-normal"> Billing </span>
+                    </a>
+                  </li>
+                  <li class="nav-item {% if navPosition == 'form-builder' %}active{% endif %} d-none">
+                    <a href="/form-builder" class="nav-link">
+                      <span class="sidenav-mini-icon"> F </span>
+                      <span class="sidenav-normal"> Form Builder </span>
+                    </a>
+                  </li>
+                  <li class="nav-item {% if navPosition == 'settings' %}active{% endif %}">
+                    <a href="/settings" class="nav-link">
+                      <span class="sidenav-mini-icon"> S </span>
+                      <span class="sidenav-normal"> Settings </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- Main content -->
+  <div class="main-content" id="panel">
+    <!-- Topnav -->
+    <nav class="navbar navbar-top navbar-expand navbar-primary bg-primary">
+      <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          
+          <div class="sidenav-toggler d-sm-block d-md-none" data-action="sidenav-unpin" data-target="#sidenav-main">
+            <div class="sidenav-toggler-inner">
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+            </div>
+          </div>
+          <!-- Navbar links -->
+          <ul class="navbar-nav align-items-center ml-md-auto ">
+          </ul>
+          <ul class="navbar-nav align-items-center ml-auto ml-md-0 ">
+            <li class="nav-item dropdown" id="notification-body">
+              <a class="text-white" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-bell-55"></i> <span id="notif-badge" style="display: none;" class="badge badge-danger">[[ length ]]</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right py-0 overflow-hidden">
+                <!-- Dropdown header -->
+                <div class="px-3 py-3">
+                  <h6 class="text-sm text-muted m-0">You have <strong class="text-danger">[[ length ]]</strong> notifications.</h6>
+                </div>
+                <!-- List group -->
+                <div class="list-group list-group-flush">
+                  <a v-if="notifications.form_length == 0" href="/form-builder" class="list-group-item list-group-item-action">
+                    <div class="row align-items-center">
+                      <div class="col-1">
+                        <i class="ni ni-bell-55 text-danger"></i>
+                      </div>
+                      <div class="col-11">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h4 class="mb-0 text-sm">Alert</h4>
+                          </div>
+                        </div>
+                        <p class="text-sm mb-0  font-weight-bold">No forms have been created. <span class="text-primary"><u>Click here</u></span> to create one now</p>
+                      </div>
+                    </div>
+                  </a>
+                  <a v-else-if="notifications.campaign_length == 0" href="/campaigns" class="list-group-item list-group-item-action">
+                    <div class="row align-items-center">
+                      <div class="col-1">
+                        <i class="ni ni-bell-55 text-danger"></i>
+                      </div>
+                      <div class="col-11">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h4 class="mb-0 text-sm">Alert</h4>
+                          </div>
+                        </div>
+                        <p class="text-sm mb-0  font-weight-bold">No campaigns have been created. <span class="text-primary"><u>Click here</u></span> to create one now</p>
+                      </div>
+                    </div>
+                  </a>
+                  <a v-else-if="notifications.lead_length == 0" href="/import-leads" class="list-group-item list-group-item-action">
+                    <div class="row align-items-center">
+                      <div class="col-1">
+                        <i class="ni ni-bell-55 text-danger"></i>
+                      </div>
+                      <div class="col-11">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h4 class="mb-0 text-sm">Alert</h4>
+                          </div>
+                        </div>
+                        <p class="text-sm mb-0  font-weight-bold">No leads have been imported. <span class="text-primary"><u>Click here</u></span> to import leads</p>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="media align-items-center">
+                  <span class="avatar avatar-sm rounded-circle">
+                  </span>
+                  <div class="media-body  ml-2  d-none d-lg-block">
+                    <span class="mb-0 text-sm  font-weight-bold text-white">{{session['user']['first_name']}} {% if session['user']['last_name'] %}{{session['user']['last_name']}}{% endif %}</span>
+                  </div>
+                </div>
+              </a>
+              <div class="dropdown-menu  dropdown-menu-right ">
+                <a href="/logout" class="dropdown-item">
+                  <i class="ni ni-user-run"></i>
+                  <span>Logout</span>
+                </a>
+                <a href="/switch-company" class="dropdown-item">
+                  <i class="ni ni-curved-next"></i>
+                  <span>Switch Company</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+{% block body %}{% endblock %}
+    <!-- Footer -->
+    <footer class="footer pt-0 d-none">
+    <div class="row align-items-center justify-content-lg-between">
+        <div class="col-lg-6">
+        <div class="copyright text-center  text-lg-left  text-muted">
+            &copy; 2020 <a href="https://www.creative-tim.com" class="font-weight-bold ml-1" target="_blank">Creative Tim</a>
+        </div>
+        </div>
+        <div class="col-lg-6">
+        <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+            <li class="nav-item">
+            <a href="https://www.creative-tim.com" class="nav-link" target="_blank">Creative Tim</a>
+            </li>
+            <li class="nav-item">
+            <a href="https://www.creative-tim.com/presentation" class="nav-link" target="_blank">About Us</a>
+            </li>
+            <li class="nav-item">
+            <a href="http://blog.creative-tim.com" class="nav-link" target="_blank">Blog</a>
+            </li>
+            <li class="nav-item">
+            <a href="https://github.com/creativetimofficial/argon-dashboard/blob/master/LICENSE.md" class="nav-link" target="_blank">MIT License</a>
+            </li>
+        </ul>
+        </div>
+    </div>
+    </footer>
+    </div>
+</div>
+<div class="row col-12 justify-content-end mt-2" style="position: fixed; top: 0px;">
+  <div class="col-sm-10 col-md-4" id="alert-holder" style="display: none;">
+    <div v-for="alert in alerts">
+      <div v-if="alert.status == 'danger'" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+          <span class="alert-icon"><i class="ni ni-air-baloon"></i></span>
+          <span class="alert-text"><strong>Failure!</strong> [[ alert.message ]]</span>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+      <div v-else class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+          <span class="alert-icon"><i class="ni ni-check-bold"></i></span>
+          <span class="alert-text"><strong>Success!</strong> [[ alert.message ]]</span>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Argon Scripts -->
+<!-- Core -->
+<script src="static/vendor/jquery/dist/jquery.min.js"></script>
+<script src="static/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>-
+<script src="static/vendor/js-cookie/js.cookie.js"></script>
+<script src="static/vendor/jquery.scrollbar/jquery.scrollbar.min.js"></script>
+<script src="static/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
+<!-- Argon JS -->
+<script src="static/js/argon.js?v=1.3.11.1"></script>
+<script src="static/js/base.js?v=1.3.11.1"></script>
+<script src="static/js/sidebar.js?v=1.3.11.1"></script>
+<!--<script src="static/js/vueJS/firsttimecheck.js?v=1.3.11.1"></script>-->
+{% block scripts %}{% endblock %}
+</body>
+
+</html>

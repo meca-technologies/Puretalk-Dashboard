@@ -1,0 +1,7 @@
+<Response>
+ <Dial record="record-from-ringing-dual"
+   recordingStatusCallback="https://d3bff1f34d9d.ngrok.io/recording/callback"
+   recordingStatusCallbackEvent="in-progress completed absent">
+ <Number>+14073053420</Number>
+ </Dial>
+</Response>

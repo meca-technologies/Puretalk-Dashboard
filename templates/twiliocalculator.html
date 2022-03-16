@@ -1,0 +1,85 @@
+{% extends "layout-admin.html" %}
+{% block body %}
+<div class="col-12 justify-content-center mt-4" id="twilio_calculator">
+    <div class="col-sm-12 col-lg-6 card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <label>AI Talktime Minutes</label>
+                    <input type="number" class="form-control twilio_calc" id="minutes" v-bind:value="minutes">
+                </div>
+                <div class="col">
+                    <label>Client Charge Per Minute</label>
+                    <input type="number" class="form-control twilio_calc" id="client_min_charge" v-bind:value="client_min_charge">
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col">
+                    <label>Puretalk Charge Per Minute</label>
+                    <input type="number" class="form-control twilio_calc" id="puretalk_min_charge" v-bind:value="puretalk_min_charge">
+                </div>
+                <div class="col">
+                    <label>Twilio Charge Per Minute</label>
+                    <input type="number" class="form-control twilio_calc" id="twilio_min_charge" v-bind:value="twilio_min_charge">
+                </div>
+            </div>
+            <div class="row mt-4">
+                <h1>Deposit Needed From Customer: $[[ formatMoney(customer_charge) ]]</h1>
+            </div>
+            <div class="row mt-4">
+                <h1>Client Profit: $[[ formatMoney(client_total) ]]</h1>
+            </div>
+            <div class="row mt-4">
+                <h1>Twilio Charge: $[[ formatMoney(twilio_charge) ]]</h1>
+            </div>
+            <div class="row mt-4">
+                <h1>Puretalk Profit: $[[ formatMoney(total) ]]</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    var twilioCalc = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#twilio_calculator',
+        data: {
+            minutes:0,
+            client_min_charge:0,
+            puretalk_min_charge:0,
+            twilio_min_charge:0,
+            total:0,
+            client_total:0,
+            twilio_charge:0,
+            customer_charge:0
+        }
+    })
+    $(".twilio_calc").change(function(){
+        var id = $(this).attr("id");
+        if(id == "minutes"){
+            twilioCalc.minutes = $(this).val();
+        }
+        else if(id == "client_min_charge"){
+            twilioCalc.client_min_charge = $(this).val();
+        }
+        else if(id == "puretalk_min_charge"){
+            twilioCalc.puretalk_min_charge = $(this).val();
+        }
+        else if(id == "twilio_min_charge"){
+            twilioCalc.twilio_min_charge = $(this).val();
+        }
+        var cust_total = twilioCalc.minutes*twilioCalc.client_min_charge;
+        twilioCalc.customer_charge = cust_total;
+
+        var client_total = twilioCalc.minutes*(twilioCalc.client_min_charge-twilioCalc.puretalk_min_charge);
+        twilioCalc.client_total = client_total;
+
+        var twilio_total = twilioCalc.minutes*twilioCalc.twilio_min_charge;
+        twilioCalc.twilio_charge = twilio_total;
+
+        twilioCalc.total = cust_total-client_total-twilio_total;
+    })
+</script>
+{% endblock %}

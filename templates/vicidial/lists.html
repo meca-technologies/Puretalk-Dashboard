@@ -1,0 +1,224 @@
+{% extends "vicidial/layout.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Lists</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col">
+        <a href="#list-add" class="sidebar-toggle btn btn-info"><span style="font-weight: 1000;">+</span> Add New List</a>
+    </div>
+    <div class="col-xl-12 mt-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Lists</h3>
+                    </div>
+                </div>
+            </div>           
+            {% with loading_id='list-body-loading', display_me='1' %}
+            <center>{% include "loading-bars.html" %}</center>
+            {% endwith %}
+            <div class="table-responsive" id="list-body" style="display: none;">
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">List ID</th>
+                            <th scope="col">List Name</th>
+                            <th scope="col">Campaign ID</th>
+                            <th scope="col">Active</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in lists" v-if="item.active == 'Y'">
+                            <td scope="row">[[ item.list_id ]]</td>
+                            <td scope="row">[[ item.list_name ]]</td>
+                            <td scope="row">[[ item.campaign_id ]]</td>
+                            <td scope="row">
+                                <span v-if="item.active == 'Y'" class="badge badge-success">Active</span>
+                                <span v-else class="badge badge-danger">Inactive</span>
+                            </td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#list-edit" class="sidebar-toggle btn btn-info btn-icon icon-left list-edit" v-bind:list-id="index" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                    <button class="btn btn-danger btn-icon icon-left list-delete" v-bind:list-id="item.list_id" data-toggle="modal" data-target="#list-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                </div> 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="list-add">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>Add List</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>List ID</small>
+                    <input type="text" class="form-control" placeholder="List ID" id="addListID" size="8" maxlength="8"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>List Name</small>
+                    <input type="text" class="form-control" placeholder="List Name" id="addListName" size="40" maxlength="40"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>List Description</small>
+                    <input type="text" class="form-control" placeholder="List Description" id="addListDescription" size="40" maxlength="255"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign</small>
+                    <select class="form-control" id="campaign-body" name="campaign-body" tabindex="-1" aria-hidden="true">
+                        <option value="">Select Campaign...</option>
+                        <option v-for="(item, index) in campaigns" v-bind:value="item.campaign_id" v-if="item.active == 'Y'">[[ item.campaign_name ]]</option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Active</small>
+                    <select class="form-control" id="addListActive">
+                        <option value="Y">Y</option>
+                        <option value="">N</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row justify-content-center">
+            <a href="#" id="add-list" class="btn btn-success">Add New List</a>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="list-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.list_name ]]</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>List Name</small>
+                    <input type="text" class="form-control" v-bind:value="details.list_name" placeholder="List Name" id="editListName" size="40" maxlength="40"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>List Description</small>
+                    <input type="text" class="form-control" v-bind:value="details.list_description" placeholder="List Description" id="editListDescription" size="40" maxlength="255"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Campaign</small>
+                    <select class="form-control" v-bind:value="details.campaign_id" id="edit-campaign-body" name="campaign-body" tabindex="-1" aria-hidden="true">
+                        <option value="" selected>Select Campaign...</option>
+                        <option v-for="(item, index) in campaigns" v-bind:value="item.campaign_id" :selected="details.campaign_id == item.campaign_id">[[ item.campaign_name ]]</option>
+                    </select><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Active</small>
+                    <select class="form-control" id="editListActive">
+                        <option value="Y" :selected="details.active == 'Y'">Y</option>
+                        <option value="N" :selected="details.active == 'N'">N</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-12">
+                    <small>Webhook Setup</small>
+                </div>
+                <div class="col-9">
+                    <input class="form-control" id="campaign-token" :value="formatWebUrl(details.list_id)" type="text">
+                </div>
+                <div class="col-3">
+                    <button class="btn btn-primary copy-btn" data-target="campaign-token" ><i class="fa fa-copy"aria-hidden="true"></i></button>
+                    <span class="bg-danger text-white p-2 rounded" id="campaign-token-copied" style="position: relative; top: 15px; left: -4px; display: none;">Copied!</span>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row justify-content-center">
+            <a href="#" id="edit-list" class="btn btn-success">Save List</a>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="list-delete" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-bell-55 ni-3x"></i>
+                    <h4 class="heading mt-4">Are you sure you want to delete this list?</h4>
+                    <p>This cannot be undone</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="list-delete-conf" data-dismiss="modal">Yes, DELETE it</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/vendor/moment.min.js"></script>
+<script src="static/js/vueJS/campaignsV2.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/listsV2.js?v=1.3.11.1"></script>
+
+<script>
+    $('body').on('click','.tab-btn', function(){
+        var tabID = $(this).attr("tab");
+        console.log(tabID);
+
+        var tabs = $(".tab");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            tabs[i].style.display = 'none';
+        }
+
+        var tabs = $(".tab-btn");
+        console.log(tabs);
+        for(var i = 0; i<tabs.length; i++){
+            $(tabs[i]).removeClass('active');
+        }
+
+        $(this).addClass('active');
+        document.getElementById(tabID).style.display = '';
+    });
+    function formatWebUrl(list_id){
+        return "https://dashboard.puretalk.ai/leads/generator/{{session['company']['id']}}/"+list_id;
+    }
+</script>
+{% endblock %}

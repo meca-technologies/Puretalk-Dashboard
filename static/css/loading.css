@@ -1,0 +1,55 @@
+.loading-gif li {
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat 0 0;
+    transform: rotate(180deg);
+    background-size: 4px 0%;
+    transition: 2s;
+    margin: 10px;
+    width: 10px;
+    height: 66px;
+    display: inline-block;
+    border-radius: 100px;
+}
+.animate-me{
+    animation: one 3s .5s ease infinite;
+    border-radius: 50px;
+    border: solid #fff 1px;
+    box-shadow: 0px 5px 9px 0px rgba(0,0,0,0.12);
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat 0 0;
+}
+.loading-gif li:first-child{height: 33px;}
+.loading-gif li:first-child .animate-me{
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat;
+    animation-delay: .25s;
+}
+.loading-gif li:nth-child(2) .animate-me, li:nth-child(4) .animate-me {
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat 0 0;
+}
+.loading-gif li:nth-child(3){height: 99px;}
+.loading-gif li:nth-child(3) .animate-me{
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat;
+    animation-delay: .75s;
+}
+.loading-gif li:nth-child(4){height: 33px;}
+.loading-gif li:nth-child(4) .animate-me{
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat;
+    animation-delay: .25s;
+}
+.loading-gif li:nth-child(5){height: 49px;}
+.loading-gif li:nth-child(5) .animate-me{
+    background: linear-gradient(to bottom, #5e72e4, #5e72e4) no-repeat;
+    animation-delay: .75s;
+}
+
+.loading-gif-container .text p {
+    animation: blinker 1.5s linear infinite;
+    font-size: 18px;
+    text-shadow: 0px 0px 5px #000;
+    color: #FFF;
+}
+@keyframes blinker {  
+    50% { opacity: 0.0; }
+}
+@-webkit-keyframes one {
+    100%, 0% {height: 10px;}
+    80% {height: 100%;}
+} 

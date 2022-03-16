@@ -1,0 +1,127 @@
+{% extends "vicidial/layout.html" %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Export Leads</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12 mt-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Export Leads</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                {% with loading_id='campaign-body-loading', display_me='1' %}
+                    <center>{% include "loading-bars.html" %}</center>
+                {% endwith %}
+                <!-- Projects table -->
+                <table class="table align-items-center table-flush" id="campaign-body" style="display: none;">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Campaign Name</th>
+                            <th scope="col">Started On</th>
+                            <th scope="col">Total Leads</th>
+                            <th scope="col">Remaining Leads</th>
+                            <th scope="col">Export</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="campaign in campaigns">
+                            <td scope="row">[[ campaign.campaign_id ]]</td>
+                            <td scope="row">[[ campaign.campaign_name ]]</td>
+                            <td scope="row">[[ formatNiceDate(campaign.campaign_calldate) ]]</td>
+                            <td scope="row">[[ campaign['extra_detail']['lead_count'] ]]</td>
+                            <td scope="row">[[ campaign['extra_detail']['remaining_leads'] ]]</td>
+                            <td>
+                                <div class="buttons">
+                                    <a href="#" class="btn btn-info btn-icon icon-left lead-export" v-bind:campaign-id="campaign.campaign_id" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-download" aria-hidden="true"></i> Export</a>
+                                </div> 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="campaign-edit">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <h2>[[ details.name ]]</h2>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <small>campaign Name</small>
+                    <input type="text" class="form-control" placeholder="campaign Name" v-bind:value="details.name"><br>
+                </div>
+                <div class="col">
+                    <small>campaign Email</small>
+                    <input type="text" class="form-control" placeholder="campaign Email" v-bind:value="details.email"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>campaign Phone</small>
+                    <input type="text" class="form-control" placeholder="campaign Phone" v-bind:value="details.phone"><br>
+                </div>
+                <div class="col">
+                    <small>campaign Website</small>
+                    <input type="text" class="form-control" placeholder="campaign Website" v-bind:value="details.website"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>campaign Logo</small>
+                    <input type="text" class="form-control" placeholder="campaign Logo" v-bind:value="details.logo"><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>campaign Address</small>
+                    <textarea class="form-control" v-bind:value="details.address"></textarea><br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <small>Locale</small>
+                    <input type="text" class="form-control" placeholder="Locale"><br>
+                </div>
+                <div class="col">
+                    <small>Status</small>
+                    <input type="text" class="form-control" placeholder="Status"><br>
+                </div>
+            </div>
+            <b class="mt-4">Account Details</b><br>
+            <div class="row">
+                <div class="col">
+                    <small>Email</small>
+                    <input type="email" class="form-control" placeholder="Email"><br>
+                </div>
+                <div class="col">
+                    <small>Password</small>
+                    <input type="password" class="form-control" placeholder="password"><br>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/js/vueJS/campaignsV2.js?v=1.3.11.1"></script>
+{% endblock %}

@@ -1,0 +1,81 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Name</label>
+            <input type="text" name="name" id="editCompanyName" class="form-control" v-bind:value="companies[0].name">
+            <input type="hidden" name="name" id="editCompanyID" class="form-control" value="{{session['user']['company_id']}}">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Short Name</label>
+            <input type="text" name="short_name" id="editCompanyShortName" class="form-control" v-bind:value="companies[0].short_name">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Email</label>
+            <input type="text" name="email" class="form-control" id="editCompanyEmail" v-bind:value="companies[0].email">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Company Phone</label>
+            <input type="text" name="phone" class="form-control" id="editCompanyPhone" v-bind:value="companies[0].phone">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label class="control-label">Address</label>
+            <textarea name="address" class="form-control" rows="8" id="editCompanyAddress">No addresses Reported</textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Locale</label>
+            <select name="lang" id="editCompanyLocale" class="form-control">
+                <option value="en"  selected >en</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="control-label">Layout</label>
+            <select name="app_layout" id="editCompanyAppLayout" class="form-control">
+                <option value="sidebar" :selected="companies[0].app_layout =='sidebar'">Sidebar</option>
+                <option value="top" :selected="companies[0].app_layout =='top'">Top</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <small>Company Logo</small><br>
+        <img class="col-lg-3 col-sm-9" v-bind:src="companies[0].logo" width="100%" alt=""/>
+        <input type="text" id="editCompanyID" class="form-control d-none" placeholder="Company Logo"><br>
+        <div class="custom-file">
+            <input type="file" class="custom-file-input" id="companyLogoFile" lang="en">
+            <label class="custom-file-label" for="companyLogoFile"></label>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="form-group">
+            <div class="control-label">RTL Mode</div>
+            <label class="custom-switch mt-2">
+            <input type="checkbox" name="rtl" class="custom-switch-input" id="editCompanyRTL" value="1" >
+            <span class="custom-switch-indicator"></span>
+            </label>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <a href="#" class="col btn btn-primary" id="edit-company">Save</a>
+</div>

@@ -1,0 +1,158 @@
+{% extends "layout-admin.html" %}
+{% block headScripts%}
+<link rel="stylesheet" href="static/vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="static/vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css">
+<style>
+    .custom-form-control{
+        border: 0;
+        font-size: .875rem;
+        height:calc(1.5em + 1.25rem + 5px);
+        font-weight: 400;
+        line-height: 1.5;
+        display: block;
+        width: 100%;
+        border-radius: .25rem;
+        background-color: #3b547c;
+        background-clip: padding-box;
+        color: #fff;
+    }
+    .custom-form-control:focus, .custom-form-control:active, .custom-form-control:focus-visible{
+        border: 0;
+        font-size: .875rem;
+        height:calc(1.5em + 1.25rem + 5px);
+        font-weight: 400;
+        line-height: 1.5;
+        display: block;
+        width: 100%;
+        border-radius: .25rem;
+        background-color: #3b547c;
+        background-clip: padding-box;
+        color: #fff;
+        outline: none;
+    }
+    .custom-form-control::placeholder{
+        color: lightgray !important;
+    }
+    .bg-lightdefault{
+        background-color: #3b547c;
+        border-color: #172b4d !important;
+    }
+    .custom-field-set{
+        height: 51px;
+        overflow:hidden;
+    }
+    .custom-field-set .col-3{
+        text-align: right;
+    }
+    .dataTables_wrapper {
+        width: 100%;
+        margin-top: 2rem;
+    }
+
+</style>
+{% endblock %}
+{% block body %}
+<!-- Header -->
+<div class="header bg-primary pb-6">
+    <div class="container-fluid">
+        <div class="header-body">
+            <div class="row align-items-center py-4">
+                <div class="col-lg-6 col-7">
+                    <h6 class="h2 text-white d-inline-block mb-0">Twilio Profile</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page content -->
+<div class="container-fluid mt--6">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card">
+            <div class="card-header border-0" id="lead-import-card">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0">Twilio Profile</h3>
+                        <select class="form-control mt-4" id="company-body">
+                            <option value="none">Please Select a Company</option>
+                            {% for company in companies %}
+                                <option value="{{company.id}}">{{ company.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="logs-loading" style="display: none;">
+                        <center>
+                            <img src="/static/img/spinner.svg" width="100px">
+                            <i>Loading Twilio Profiles</i>
+                        </center>
+                    </div>
+                    <div class="row justify-content-center" id="logs-body" style="text-align: left;">
+                        <table class="table table-flush mt-4" style="text-align: left;" id="product-table">
+                            <thead>
+                                <th>SID</th>
+                                <th>Friendly Name</th>
+                                <th>Policy SID</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </thead>
+                            <tbody>
+                                <tr v-for="product in products">
+                                    <td>[[ product.sid ]]</td>
+                                    <td>[[ product.friendly_name ]]</td>
+                                    <td>[[ product.policy_sid ]]</td>
+                                    <td>[[ product.email ]]</td>
+                                    <td>[[ product.status ]]</td>
+                                    <td>[[ product.date_created ]]</td>
+                                    <td>
+                                        <a href="#product-view" class="sidebar-toggle btn btn-info btn-icon icon-left product-view" v-bind:product-id="product.sid" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sidebar-modal" id="product-view">
+    <div class="sidebar-transparent"></div>
+    <div class="sidebar-content bg-white shadow shadow-lg p-4">
+        <div class="sidebar-header">
+            <div id="product-view-loading">
+                <center>
+                    <img src="/static/img/spinner.svg"width="100px">
+                    <p>Loading Product Details...</p>
+                </center>
+            </div>
+            <div id="product-view-body" style="display: none;">
+                <b class="mt-4">Product Details</b>
+                <hr>
+                <div class="row">
+                    <div class="col-12" v-for="detail in details">
+                        [[ detail.phone_number ]]
+                    </div>
+                </div>
+            <hr>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="static/vendor/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+<script src="static/vendor/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.html5.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
+<script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
+<script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
+<script src="static/js/vueJS/companies.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/twilio.js?v=1.3.11.1"></script>
+{% endblock %}

@@ -1,0 +1,203 @@
+
+                        <ul class="nav nav-tabs custom-tab" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active setting-link" tab-group="settings" tab-target="vici-settings-tab" data-toggle="tab" href="#vici-settings-app" role="tab" aria-controls="vici-settings-app" aria-selected="true"><i class="fa fa-cog"></i> Vici Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link setting-link" tab-group="settings" tab-target="twilio-settings-tab" data-toggle="tab" href="#twilio-settings-app" role="tab" aria-controls="twilio-settings-app" aria-selected="true"><i class="fa fa-cog"></i> Twilio Settings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link setting-link" tab-group="settings" tab-target="twilio-numbers-tab" data-toggle="tab" href="#twilio-numbers-app" role="tab" aria-controls="twilio-numbers-app" aria-selected="true"><i class="fa fa-mobile-alt"></i> Twilio Number</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="active setting-tab" tab-parent="settings" id="vici-settings-tab" role="tabpanel" aria-labelledby="vici-settings-tab">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card" id="settings-card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <div class="control-label">Enable Vici</div>
+                                                            <label class="custom-switch mt-2">
+                                                                <label class="switch" style="top:6px">
+                                                                    <input type="checkbox" id="viciEnabled" :checked="vici.vici_enabled === true">
+                                                                    <span class="slider slider-success round"></span>
+                                                                </label>
+                                                                <span class="custom-switch-indicator"></span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row show_hide_vici_fields" style="display: none;" >
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Vici Server</label>
+                                                            <input type="text" id="vici-server" name="vici_server" class="form-control" v-bind:value="vici.vici_server">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row show_hide_vici_fields"  style="display: none;" >
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Username</label>
+                                                            <input type="text" id="vici-user" name="vici_user" class="form-control" v-bind:value="vici.vici_user">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row show_hide_vici_fields"  style="display: none;" >
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Password</label>
+                                                            <input type="password" id="vici-password" name="vici_password" class="form-control" v-bind:value="vici.vici_password">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer bg-whitesmoke text-md-left">
+                                                <a href="#" id="save-vici-info" class="btn btn-primary">Save</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-tab" tab-parent="settings" id="twilio-settings-tab" role="tabpanel" aria-labelledby="twilio-settings-tab">
+                                <div class="alert alert-info alert-has-icon mt-4">
+                                    <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
+                                    <div class="alert-body">
+                                        <div class="alert-title">TwiML Apps Voice REQUEST URL</div>
+                                        https://puretalk.ai/twilio/support/call/17e62166fc8586dfa4d1bc0e1742c08b
+                                    </div>
+                                </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card" id="settings-card">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <div class="control-label">Enable Twilio</div>
+                                                                <label class="custom-switch mt-2">
+                                                                    <label class="switch" style="top:6px">
+                                                                        <input type="checkbox" id="twilioEnabled" :checked="twilio[0].twilio_enabled[0] === true">
+                                                                        <span class="slider slider-success round"></span>
+                                                                    </label>
+                                                                    <span class="custom-switch-indicator"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row show_hide_twilio_fields" style="display: none;" >
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Twilio Account SID</label>
+                                                                <input type="text" id="twilio-account-sid" name="twilio_account_sid" class="form-control" v-bind:value="twilio[0].twilio_account_sid[0]">
+                                                                <small id="twilioAccountSidHelpBlock" class="form-text text-muted">
+                                                                Click Here To Find It : <a href="https://www.twilio.com/console" target="_blank">https://www.twilio.com/console</a>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row show_hide_twilio_fields"  style="display: none;" >
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Twilio Auth Token</label>
+                                                                <input type="text" id="twilio-auth-token" name="twilio_auth_token" class="form-control" v-bind:value="twilio[0].twilio_auth_token[0]">
+                                                                <small id="twilioAuthTokenHelpBlock" class="form-text text-muted">
+                                                                Click Here To Find It : <a href="https://www.twilio.com/console" target="_blank">https://www.twilio.com/console</a>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row show_hide_twilio_fields"  style="display: none;" >
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Twilio Application SID</label>
+                                                                <input type="text" id="twilio-application-sid" name="twilio_application_sid" class="form-control" v-bind:value="twilio[0].twilio_application_sid">
+                                                                <small id="twilioApplicationSidHelpBlock" class="form-text text-muted">
+                                                                Click Here To Find It : <a href="https://www.twilio.com/console/voice/twiml/apps" target="_blank">https://www.twilio.com/console/voice/twiml/apps</a>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer bg-whitesmoke text-md-left">
+                                                    <a href="#" id="save-twilio-info" class="btn btn-primary">Save</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                            <div class="setting-tab" id="twilio-numbers-tab" tab-parent="settings" role="tabpanel" aria-labelledby="twilio-numbers-tab">
+                                <div class="alert alert-info alert-has-ico mt-4">
+                                    <div class="alert-icon"><i class="far fa-lightbulb"></i></div>
+                                    <div class="alert-body">
+                                        <div class="alert-title">Inbound Call Webhook (A CALL COMES IN)</div>
+                                        https://puretalk.ai/twilio/inbound-webhook/17e62166fc8586dfa4d1bc0e1742c08b
+                                        <br>
+                                        Copy this webhook url and paste it in your twilio account number under A CALL COMES IN to receive inbound calls.                        
+                                    </div>
+                                </div>
+                                <form method="POST" action="https://puretalk.ai" accept-charset="UTF-8" class=" ajax-form" id="add-edit-number-form">
+                                    <input name="_token" type="hidden" value="FqATyVvQZsiXoYH3KslcINUbRJPIhBXRptxSltZv">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Phone Number</label>
+                                                                <input type="text" name="number" class="form-control" id="twilio-number-phone" v-bind:value="twilio[0].number">
+                                                                <input type="hidden" name="number" class="form-control" id="twilio-number-id" v-bind:value="twilio[0].id">
+                                                                <small id="twilioPhoneNumberHelpBlock" class="form-text text-muted">
+                                                                Click Here To Find It : <a href="https://www.twilio.com/console/voice/numbers" target="_blank">https://www.twilio.com/console/voice/numbers</a>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Outbound Call Recording Option</label>
+                                                                <select class="form-control selectric" id="twilio-number-outbound" name="outbound_recording" v-bind:value="twilio[0].outbound_recording">
+                                                                    <option value="do-not-record" >Do Not Record</option>
+                                                                    <option value="record-from-answer" >Record From Answer</option>
+                                                                    <option value="record-from-ringing" >Record From Ringing</option>
+                                                                    <option value="record-from-answer-dual" >Record From Answer Dual</option>
+                                                                    <option value="record-from-ringing-dual" >Record From Ringing Dual</option>
+                                                                </select>
+                                                                <small id="twilioRecordingHelpBlock" class="form-text text-muted">
+                                                                Click Here To Find It : <a href="https://www.twilio.com/docs/voice/twiml/dial#record" target="_blank">https://www.twilio.com/docs/voice/twiml/dial#record</a>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Inbound Call Recording Option</label>
+                                                                <select class="form-control selectric" id="twilio-number-inbound" name="inbound_recording" v-bind:value="twilio[0].inbound_recording">
+                                                                    <option value="do-not-record" >Do Not Record</option>
+                                                                    <option value="record-from-answer" >Record From Answer</option>
+                                                                    <option value="record-from-ringing" >Record From Ringing</option>
+                                                                    <option value="record-from-answer-dual" >Record From Answer Dual</option>
+                                                                    <option value="record-from-ringing-dual" >Record From Ringing Dual</option>
+                                                                </select>
+                                                                <small id="twilioRecordingHelpBlock" class="form-text text-muted">
+                                                                Click Here To Find It : <a href="https://www.twilio.com/docs/voice/twiml/dial#record" target="_blank">https://www.twilio.com/docs/voice/twiml/dial#record</a>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer bg-whitesmoke text-md-left">
+                                                    <a href="#" class="btn btn-primary" id="save-twilio-number">Save</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
