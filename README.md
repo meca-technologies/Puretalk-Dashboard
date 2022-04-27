@@ -1,6 +1,8 @@
 # Puretalk-Dashboard
 ### Stack Overview
 ![Stack Overview](https://dashboard.puretalk.ai/static/img/stack-sm.jpg?v=1)
+### Diagram
+![Layout](https://miro.medium.com/max/1400/1*zGC7qRcsw4G9I9u9KjMqaQ.png)
 
 ### Setup
 - Digital Ocean
