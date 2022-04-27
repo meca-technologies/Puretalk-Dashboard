@@ -161,7 +161,7 @@ server {
         add_header 'Access-Control-Allow-Methods' 'POST' always;
         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
-        proxy_pass http://unix:/var/www/puretalk-dashboard/puretalk-dashboard.sockk;
+        proxy_pass http://unix:/var/www/puretalk-dashboard/puretalk-dashboard.sock;
     }
 }
 ```
