@@ -29,8 +29,10 @@ $(document).ready(function(){
         }
     });
 
-    $('[data-toggle="popover"]').popover();   
-    $("#popover").popover({ trigger: "hover focus" });
+    try{
+        $('[data-toggle="popover"]').popover();   
+        $("#popover").popover({ trigger: "hover focus" });
+    }catch(error){}
 
     /*var timeControllers = document.getElementsByClassName('time-control');
     for(var i = 0; i<timeControllers.length; i++){
@@ -434,4 +436,47 @@ function generateID(length=6) {
         result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
     }
     return result;
+}
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+function getURLParam(search){
+    return urlParams.get(search);
+}
+
+function updateURLParameters(param, paramVal){
+    var url = window.location.href;
+    var tempArray = url.split("?");
+    var base_url = tempArray[0];
+    const keys = urlParams.keys()
+    var key_dict = {};
+    for (const key of keys){
+        var val = urlParams.get(key);
+        key_dict[key] = val;
+    }
+    key_dict[param] = paramVal;
+    var query_url = '';
+    for (const key of Object.keys(key_dict)){
+        query_url += String(key) + '=' + String(key_dict[key]) + '&';
+    }
+    return base_url + '?' + query_url.substring(0,query_url.length-1);
+}
+
+function updateURLParameter(url, param, paramVal){
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+    if (additionalURL) {
+        tempArray = additionalURL.split("&");
+        for (var i=0; i<tempArray.length; i++){
+            if(tempArray[i].split('=')[0] != param){
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }
+    }
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
 }

@@ -166,3 +166,5 @@ twilioCallLogs.py
 static/ruth_nlu.zip
 
 db.db
+
+*.wav

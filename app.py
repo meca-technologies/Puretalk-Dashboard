@@ -55,6 +55,7 @@ from routes.twilioBlueprint import twilioBlueprint
 from routes.squareAPI import squareBlueprint
 from routes.conversationFlow import conversationBlueprint
 from routes.plivoBlueprint import plivoBlueprint
+from routes.ttsBlueprint import ttsBlueprint
 
 app.register_blueprint(apiBlueprint)
 app.register_blueprint(customerApiBlueprint)
@@ -66,6 +67,7 @@ app.register_blueprint(twilioBlueprint)
 app.register_blueprint(squareBlueprint)
 app.register_blueprint(conversationBlueprint)
 app.register_blueprint(plivoBlueprint)
+app.register_blueprint(ttsBlueprint)
 
 version = '1.3.9.7'
 
