@@ -1,10 +1,17 @@
 # Puretalk-Dashboard
-### Stack Overview
+## Stack Overview
 ![Stack Overview](https://dashboard.puretalk.ai/static/img/stack-sm.jpg?v=1)
-### Diagram
+## Diagram
 ![Layout](https://miro.medium.com/max/1400/1*zGC7qRcsw4G9I9u9KjMqaQ.png)
-
-### Setup
+## Definitions
+### NGINX
+NGINX, is an open-source web server that is also used as a reverse proxy, HTTP cache, and load balancer.
+### GUNICORN
+Green Unicorn (Gunicorn) is a Python WSGI server that runs Python web application code. Gunicorn is one of many WSGI server implementations, but it’s particularly important because it is a stable, commonly-used part of web app deployments that’s powered some of the largest Python-powered web applications , such as Instagram
+### HOW NGINX, GUNICORN, and FLASK work together
+Nginx is at the outermost tier of the Backend(3-tiers). Middle tier is the Gunicorn and third tier is the python app which ultimately connects to the database.
+Nginx is used as proxy, reverse proxy, load balancer, static data dispatcher and cache etc. While Gunicorn is the Interface between the nginx server and the python app so that the app(or any python framework) understands the incoming requests and process them accordingly.
+## Setup
 - Digital Ocean
   - Two servers (ubuntu-nginx-2-nyc1 and ubuntu-nginx-3-nyc1)
   - Load balancer (nyc1-load-balancer-puretalk-dashboard)
