@@ -3,7 +3,26 @@
 ![Stack Overview](https://dashboard.puretalk.ai/static/img/stack-sm.jpg?v=1)
 ## Diagram
 ![Layout](https://miro.medium.com/max/1400/1*zGC7qRcsw4G9I9u9KjMqaQ.png)
+### Layout
+#### /ROUTES
+The routes folder hosts all the blueprint files that define all web routes. Flask uses a concept of blueprints for making application components and supporting common patterns within an application or across applications. Blueprints can greatly simplify how large applications work and provide a central means for Flask extensions to register operations on applications.
+#### /STATIC
+Folder that stores all static content for the webserver
+#### /TEMPLATES
+Folder that stores all of the HTML templates to be rendered by the Flask app
+#### wsgi.py
+WSGI is the python app that spins up the Flask server
+#### app.py
+This is the main controller that sets up the blueprint routes and libraries necessary for the dashboard to run. It also acts as main blueprint for the dashboard and renders all HTML templates
+#### aggrFunctions.py
+This library simplifies making aggregate searches to MongoDB
+#### pureAPI.py
+This blueprint holds all general API endpoints used by the dashboard itself
+#### univFuncs.py
+Holds all universal functions that are used throughout the app
 ## Definitions
+### JINJA
+Jinja is a fast, expressive, extensible templating engine. Special placeholders in the template allow writing code similar to Python syntax. Then the template is passed data to render the final document.
 ### NGINX
 NGINX, is an open-source web server that is also used as a reverse proxy, HTTP cache, and load balancer.
 ### GUNICORN
@@ -77,7 +96,7 @@ pip install -r requirements.txt
 gunicorn --bind 0.0.0.0:5000 wsgi:app
 ```
 * Output should look like this
-```bash
+```
 Output
 [2021-11-19 23:07:57 +0000] [8760] [INFO] Starting gunicorn 20.1.0
 [2021-11-19 23:07:57 +0000] [8760] [INFO] Listening at: http://0.0.0.0:5000 (8760)
