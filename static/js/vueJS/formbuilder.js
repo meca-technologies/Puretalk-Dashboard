@@ -242,7 +242,8 @@ var csvDetails = new Vue({
     data: {
         fields:[],
         columns:[],
-        fullDetails:[]
+        fullDetails:[],
+        field_mappings:{}
     }
 })
 try{
@@ -264,10 +265,16 @@ function handleFiles() {
         var columns = lineBreaks[0].split(',');
         csvDetails.columns = columns;
         for(var i = 0; i<csvDetails.columns.length; i++){
-            csvDetails.fullDetails.push({
+            var full_detail_temp = {
                 'column_name':csvDetails.columns[i],
                 'fields':csvDetails.details
-            })
+            }
+
+            try{
+                full_detail_temp['selected_field'] = csvDetails.field_mappings[csvDetails.columns[i]];
+            }catch(error){}
+
+            csvDetails.fullDetails.push(full_detail_temp)
         }
     });
     reader.readAsBinaryString(myFile);
@@ -283,16 +290,49 @@ $('#campaign-body').change(function(){
         var newFormID = data[0]['form_id'];
         var url = '/api/v1/forms?formid='+newFormID;
         var jqxhr = $.get( url, function(data) {
+            csvDetails.field_mappings = data[0]['field_mappings']
             csvDetails.details = data[0]['fields'];
             csvDetails.fullDetails = [];
             for(var i = 0; i<csvDetails.columns.length; i++){
-                csvDetails.fullDetails.push({
+                var full_detail_temp = {
                     'column_name':csvDetails.columns[i],
                     'fields':csvDetails.details
-                })
+                }
+
+                try{
+                    full_detail_temp['selected_field'] = csvDetails.field_mappings[csvDetails.columns[i]];
+                }catch(error){}
+
+                csvDetails.fullDetails.push(full_detail_temp);
+                //csvDetails.fullDetails.push({
+                //    'column_name':csvDetails.columns[i],
+                //    'fields':csvDetails.details
+                //})
             }
+            console.log(csvDetails.fullDetails);
         })
     })
+})
+
+$('body').on('change','.form-layout', function(){
+    var change_val = $(this).val();
+    var columnLayoutSelects = $(".form-layout");
+    var counts = 0;
+    for(var i = 0; i<columnLayoutSelects.length; i++){
+        if(columnLayoutSelects[i].value == change_val){
+            counts+=1;
+        }
+    }
+    if(counts > 1){
+        $(this).addClass('border-danger');
+        p_tag = $(this).parent().find('p').css( "display", "" );
+        $("#importCSV").prop( "disabled", true );
+    }
+    else{
+        $(this).removeClass('border-danger');
+        p_tag = $(this).parent().find('p').css( "display", "none" );
+        $("#importCSV").prop( "disabled", false );
+    }
 })
 
 $('body').on('click','#importCSV', function(){
@@ -381,3 +421,62 @@ function getLeadStatus(){
         location.reload();
     }
 }
+
+/** FIELD MAPPINGS **/
+
+var fieldMappingDetails = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#field-mapping-table',
+    data: {
+        field_mappings:{},
+        fields:[]
+    }
+})
+
+$('body').on('change','.form-builder', function(){
+    formID = $(this).val();
+    var url = '/api/v1/forms?formid='+formID;
+    var jqxhr = $.get( url, function(data) {
+        fieldMappingDetails.field_mappings = data[0]['field_mappings'];
+        fieldMappingDetails.fields = data[0]['fields'];
+        fieldMappingDetails.fields.push({
+            "field_name": "IGNORED"
+        })
+        document.getElementById("field-mapping-wrapper").style.display = '';
+    })
+});
+
+function getCurrentMappings(){
+    var selected_field_csvs = document.getElementsByClassName("selected_field_csv");
+    var selected_field_forms = document.getElementsByClassName("selected_field_form");
+
+    var field_mappings = {};
+    for(var i = 0; i<selected_field_csvs.length; i++){
+        field_mappings[selected_field_csvs[i].value] = selected_field_forms[i].value;
+    }
+    return field_mappings;
+}
+
+$('body').on('click','#save-field-mapping', function(){
+    var postData = {
+        'id':$("#form-builder").val(),
+        'field_mappings':getCurrentMappings()
+    }
+    console.log(JSON.stringify(postData));
+    postToAPI('/api/v1/forms', postData, 'PUT', 'doNothing');
+});
+
+$('body').on('click','#add-field-mapping', function(){
+    field_mappings = getCurrentMappings();
+    field_mappings['test'] = 'test';
+    fieldMappingDetails.field_mappings = field_mappings;
+})
+
+$('body').on('click','.delete-field-mapping', function(){
+    var del_index = $(this).attr("index");
+    var selected_field_csvs = document.getElementsByClassName("selected_field_csv");
+
+    field_mappings = getCurrentMappings()
+    delete field_mappings[$(selected_field_csvs[del_index]).val()];
+    fieldMappingDetails.field_mappings = field_mappings;
+})

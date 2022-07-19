@@ -112,8 +112,6 @@ function updateusers(){
     });
     var url = '/api/v1/roles';
     var jqxhr = $.get( url, function(data) {
-        console.log(data);
-        console.log(data);
         newUserDetails.roles = data;
     })
 }
@@ -130,6 +128,7 @@ function updateUserCompanies(){
     var jqxhr = $.get( url, function(data) {
         console.log(data);
         newUserDetails.companies = data;
+        userInviteDetails.companies = data;
     })
 }
 updateUserCompanies();
@@ -337,14 +336,51 @@ $('body').on('click','#add-user', function(){
     }
 });
 
-$('body').on('click','.user-invite', function(){
-    var postData = {
-        'user_id':$(this).attr('user-id')
+
+var userInviteDetails = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#user-activate',
+    data: {
+        smtp_companies:[],
+        companies:[],
+        user_id:null
     }
-    
-    console.log(postData);
-    postToAPI('/api/v1/users/signup', postData, 'POST', 'donothing');
 })
+
+$('body').on('click','.user-invite', function(){
+    var url = '/api/v1/users?userid='+$(this).attr('user-id');
+
+    document.getElementById("user-invite-loading").style.display = '';
+    document.getElementById("user-invite-select").style.display = 'none';
+    $("#user-send").prop( "disabled", true );
+
+    var jqxhr = $.get( url, function(data) {
+        var temp_roles =  data['users'][0]['roles'];
+        userInviteDetails.user_id = data['users'][0]['id'];
+        for(var i = 0; i<temp_roles.length; i++){
+            for(var j = 0; j<userInviteDetails.companies.length; j++){
+                if(temp_roles[i]['company_id'] == userInviteDetails.companies[j]['id']){
+                    temp_roles[i]['company_name'] = userInviteDetails.companies[j]['name']
+                }
+            }
+        }
+        userInviteDetails.smtp_companies = temp_roles;
+
+        document.getElementById("user-invite-loading").style.display = 'none';
+        document.getElementById("user-invite-select").style.display = '';
+
+        $("#user-send").prop( "disabled", false );
+    });
+})
+
+$('body').on('click','#user-send', function(){
+    var post_data = {
+        "company_id":$("#user-invite-select").val(),
+        "user_id":userInviteDetails.user_id
+    }
+    console.log(post_data);
+    postToAPI('/api/v1/users/signup', post_data, 'POST', 'updateusers');
+});
 
 $('body').on('click','#edit-user', function(){
     //if(validateForm(['#editUserID', '#editUserFName'])){

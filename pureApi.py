@@ -999,7 +999,12 @@ def emailAPI():
 
         else:
             try:
-                returnPost = simpleUpdateRow(email_settings, request.json, request.method, str(request.environ.get('HTTP_X_FORWARDED_FOR')).split(','))
+                req_method = request.method
+                req_json = request.json
+                if req_json['id'] == '':
+                    req_method = 'POST'
+                    req_json['company_id'] = ObjectId(session['user']['company_id'])
+                returnPost = simpleUpdateRow(email_settings, req_json, req_method, str(request.environ.get('HTTP_X_FORWARDED_FOR')).split(','))
                 #client.close()
                 return jsonify(returnPost)
             except:
@@ -2297,33 +2302,88 @@ def userSignupAPI():
                 signup_tokens_col = mongoDB['signup_tokens']
                 return_row = simpleUpdateRow(signup_tokens_col, updateData, 'POST', str(request.environ.get('HTTP_X_FORWARDED_FOR')).split(','))
 
+                
+                email_settings_col = mongoDB['email_settings']
+                email_filter_by = {
+                    'company_id':ObjectId(updateData['company_id'])
+                }
+                email_setting_row = email_settings_col.find_one(email_filter_by)
+                email_host = email_setting_row['mail_host'] #smtp.office365.com
+                email_port = email_setting_row['mail_port'] #587
+                email_username = email_setting_row['mail_username'] #info@puretalk.ai
+                email_password = email_setting_row['mail_password'] #
+                email_from_name = email_setting_row['mail_from_name'] #Shawn Test
+
+                company_col = mongoDB['companies']
+                company_filter_by = {
+                    '_id':ObjectId(updateData['company_id'])
+                }
+                company_row = company_col.find_one(company_filter_by)
+                company_name = company_row['name']
+                company_logo = company_row['logo']
+
                 ## EMAIL THE TOKEN #####
-                s = smtplib.SMTP(host='smtp.office365.com', port=587)
+                s = smtplib.SMTP(host=email_host, port=email_port)
                 s.starttls()
-                s.login("info@puretalk.ai", config.SMTP_PASSWORD)
+                s.login(email_username, email_password)
 
                 msg = MIMEMultipart()
                 msg['Subject'] = 'Invite Request'
-                msg['From'] = "info@puretalk.ai"
+                msg['From'] = email_username
                 msg['To'] = user['email']
                 #msg['To'] = 'shawnhasten@gmail.com'
-                text_message = "Puretalk Invite Link\nhttps://dashboard.puretalk.ai/user-sign-up?token={}".format(return_row['id'])
+                image_message= f"<img src='https://dashboard.puretalk.ai/static/img/brand/{company_logo}' style='width: 300px;'>"
+                company_message = f"<h2><b>{company_name} has invited you to join!</b></h2>"
+                anchor_message = f"<a class='btn' target='_blank' href='https://dashboard.puretalk.ai/user-sign-up?token={return_row['id']}'>Click For Access</a>"
                 html_message = """
                 <html>
-                <body>
-                <a href='https://dashboard.puretalk.ai/user-sign-up/{}'>
-                <body>
+                    <head>
+                        <style>
+                            body{
+                                font-family: Arial, Helvetica, sans-serif;
+                                background-color: #CCC;
+                            }
+                            .wrapper{
+                                width: 600px;
+                                background-color: #FFF;
+                                padding: 2em;
+                                text-align: center;
+                            }
+                            .btn{
+                                text-align: center;
+                                border: solid 1px #6f55ff;
+                                border-radius: 3px;
+                                box-sizing: border-box;
+                                display: inline-block;
+                                font-size: 16px;
+                                font-weight: bold;
+                                margin: 0;
+                                border-width: 12px 25px;
+                                text-decoration: none;
+                                text-transform: uppercase;
+                                background-color: #6f55ff;
+                                color: #FFF!important;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="wrapper">
+                """
+                html_message += image_message
+                html_message += company_message
+                html_message += anchor_message
+                html_message += """
+                        </div>
+                    </body>
                 </html>
                 """.format(return_row['id'])
 
                 # Record the MIME types of both parts - text/plain and text/html.
-                part1 = MIMEText(text_message, 'plain')
                 part2 = MIMEText(html_message, 'html')
 
                 # Attach parts into message container.
                 # According to RFC 2046, the last part of a multipart message, in this case
                 # the HTML message, is best and preferred.
-                msg.attach(part1)
                 msg.attach(part2)
                 s.send_message(msg)
                 s.quit()

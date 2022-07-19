@@ -359,7 +359,7 @@ def convertAPI(account):
     return jsonify({'Error':'Could not authenticate!'})
 
 def getTTS(text, audio_style=False):
-    url = 'http://137.184.57.49:5006/convert'
+    url = 'http://137.184.57.49:6000/convert'
     content = text
     if audio_style:
         payload = {

@@ -247,6 +247,32 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="user-activate" tabindex="-1" role="dialog" aria-labelledby="modal-notification" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-success modal-dialog-centered modal-" role="document">
+        <div class="modal-content bg-success">
+            <div class="modal-header">
+                <h6 class="modal-title" id="modal-title-notification">Your attention is required</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <i class="ni ni-email-83 ni-3x"></i>
+                    <h4 class="heading mt-4">Which Company Email Do You Wish To Send From?</h4>
+                    <center><img src="/static/img/spinner.svg" id="user-invite-loading" width="100px"></center>
+                    <select class="form-control" id="user-invite-select">
+                        <option v-for="company in smtp_companies" v-bind:value="company.company_id">[[ company.company_name ]]</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" id="user-send" data-dismiss="modal">Send Invite</button>
+                <button type="button" class="btn btn-link text-white ml-auto" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% include "staff-setup-template.html" %}
 {% endblock %}
 {% block scripts %}
@@ -266,7 +292,7 @@
 <script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
 <script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
 <script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
-<script src="static/js/vueJS/users.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/users.js?v=1.3.11.2"></script>
 <script>
     function returnTrue(roleList, role){
         for(var i = 0; i<roleList.length; i++){

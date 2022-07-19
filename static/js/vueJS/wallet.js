@@ -15,7 +15,7 @@ var walletTransactions = new Vue({
     }
 })
 
-function getWallet(){
+function getTransactions(){
     var url = '/api/v1/wallet/balance';
     var jqxhr = $.get( url, function(data) {
         console.log(data)
@@ -33,7 +33,7 @@ function getWallet(){
     });
 }
 
-getWallet();
+getTransactions();
 
 
 $("#wallet-add-funds").click(function(){
@@ -86,7 +86,7 @@ $("#wallet-add-funds").click(function(){
                 parent = $(parent).parent().get( 0 );
                 parent.style.height = '51px';
                 $('#add-funds').modal('hide');
-                getWallet();
+                getTransactions();
                 document.getElementById("stripe-charge-loading").style.display = "none";
                 document.getElementById("stripe-charge").style.display = "";
             }
@@ -132,3 +132,36 @@ $("#card-exp").keydown(function(){
     }
     $(this).val(new_val);
 });
+
+$('body').on('click','.card-tab', function(){
+    var data_target = $(this).attr('data-target');
+    var card_tabs = document.getElementsByClassName("card-tab");
+    for(var i = 0; i<card_tabs.length; i++){
+        $(card_tabs[i]).removeClass('active');
+    }
+    $(this).addClass('active');
+    $("#square-create-card-body").addClass('d-none');
+    $("#square-select-card-body").addClass('d-none');
+    $(data_target).removeClass('d-none');
+});
+
+var coffDetails = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#square-select-card-body',
+    data: {
+        coffs:[]
+    }
+});
+
+function getCOFF(){
+    var url = '/api/v1/square/coff?companyid='+$("#company-body").val();
+    var jqxhr = $.get( url, function(data) {
+        coffDetails.coffs = data;
+    });
+}
+
+function getCardImage(brand){
+    return 'static/img/icons/common/'+String(brand).toLowerCase()+'.png'
+}
+
+getCOFF();

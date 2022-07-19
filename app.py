@@ -48,26 +48,19 @@ from pureApi import unsetCompanyID
 
 
 from vicidialAPI import viciApiBlueprint
-from routes.logBlueprint import logBlueprint
-from routes.campaignsBlueprint import campaignsBlueprint
-from routes.leadsBlueprint import leadsBlueprint
-from routes.twilioBlueprint import twilioBlueprint
-from routes.squareAPI import squareBlueprint
-from routes.conversationFlow import conversationBlueprint
-from routes.plivoBlueprint import plivoBlueprint
-from routes.ttsBlueprint import ttsBlueprint
+from routes import logBlueprint, campaignsBlueprint, leadsBlueprint, twilioBlueprint, conversationFlow, plivoBlueprint, ttsBlueprint, squareAPI
 
 app.register_blueprint(apiBlueprint)
 app.register_blueprint(customerApiBlueprint)
 app.register_blueprint(viciApiBlueprint)
-app.register_blueprint(logBlueprint)
-app.register_blueprint(campaignsBlueprint)
-app.register_blueprint(leadsBlueprint)
-app.register_blueprint(twilioBlueprint)
-app.register_blueprint(squareBlueprint)
-app.register_blueprint(conversationBlueprint)
-app.register_blueprint(plivoBlueprint)
-app.register_blueprint(ttsBlueprint)
+app.register_blueprint(logBlueprint.logBlueprint)
+app.register_blueprint(campaignsBlueprint.campaignsBlueprint)
+app.register_blueprint(leadsBlueprint.leadsBlueprint)
+app.register_blueprint(twilioBlueprint.twilioBlueprint)
+app.register_blueprint(squareAPI.squareBlueprint)
+app.register_blueprint(conversationFlow.conversationBlueprint)
+app.register_blueprint(plivoBlueprint.plivoBlueprint)
+app.register_blueprint(ttsBlueprint.ttsBlueprint)
 
 version = '1.3.9.7'
 
@@ -540,6 +533,19 @@ def formBuilder():
             if session['call_type'] == 'twilio':
                 return render_template('twilio/form-builder.html', companyName='PureTalk', pageTitle='Form Builder', navPosition='form-builder', navTab='settings')
             return render_template('vicidial/form-builder.html', companyName='PureTalk', pageTitle='Form Builder', navPosition='form-builder', navTab='settings')
+        else:
+            return redirect('/super-admin')
+
+    return redirect('/login')
+    
+@app.route('/field-mappings')
+def formMappings():
+    if validateLogin():
+        if session['user']['company_id']:
+            updateUserLog(request.path, str(request.environ.get('HTTP_X_FORWARDED_FOR')).split(','))
+            if session['call_type'] == 'twilio':
+                return render_template('twilio/field-mappings.html', companyName='PureTalk', pageTitle='Form Mappings', navPosition='field-mappings', navTab='settings')
+            return render_template('vicidial/field-mappings.html', companyName='PureTalk', pageTitle='Form Mappings', navPosition='field-mappings', navTab='settings')
         else:
             return redirect('/super-admin')
 

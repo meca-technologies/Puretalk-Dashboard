@@ -59,6 +59,7 @@ $("#wallet-filter-report").click(function(){
 
 $('#company-body').change(function(){
     getTransactions(this);
+    getCOFF(this);
 });
 
 function getTransactions(_this){
@@ -115,6 +116,7 @@ $("#wallet-add-credit").click(function(){
     console.log(postData);
     postToAPI('/api/v1/wallet', postData, 'POST', 'updateWalletBalance');
 });
+
 $("#wallet-add-funds").click(function(){
     var memo = $("#memo").val()
     if (memo == ''){
@@ -180,7 +182,8 @@ $("#wallet-add-funds").click(function(){
             console.log('FAILURE');
         }
     });
-})
+});
+
 $("#card-number").keydown(function(){
     var number = $(this).val().replace(/\D/g,'');
     var number_split = number.split('');
@@ -297,4 +300,35 @@ function myFunc(total, num) {
     //console.log(String(total_amount) + "+" + String(amount));
     //console.log('\n');
     return total_amount + amount;
+}
+
+$('body').on('click','.card-tab', function(){
+    var data_target = $(this).attr('data-target');
+    var card_tabs = document.getElementsByClassName("card-tab");
+    for(var i = 0; i<card_tabs.length; i++){
+        $(card_tabs[i]).removeClass('active');
+    }
+    $(this).addClass('active');
+    $("#square-create-card-body").addClass('d-none');
+    $("#square-select-card-body").addClass('d-none');
+    $(data_target).removeClass('d-none');
+});
+
+var coffDetails = new Vue({
+    delimiters: ['[[', ']]'],
+    el: '#square-select-card-body',
+    data: {
+        coffs:[]
+    }
+});
+
+function getCOFF(_this){
+    var url = '/api/v1/square/coff?companyid='+$(_this).val();
+    var jqxhr = $.get( url, function(data) {
+        coffDetails.coffs = data;
+    });
+}
+
+function getCardImage(brand){
+    return 'static/img/icons/common/'+String(brand).toLowerCase()+'.png'
 }

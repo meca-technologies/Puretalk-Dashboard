@@ -51,7 +51,7 @@
                                     <div class="buttons">
                                         <a href="#user-edit" class="sidebar-toggle btn btn-info btn-icon icon-left user-edit" user-id="{{user.id}}" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-edit" aria-hidden="true"></i></a>
                                         {% if user.status != 'enabled' %}
-                                        <button class="btn btn-success btn-icon icon-left user-invite" user-id="{{user.id}}"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                                        <button class="btn btn-success btn-icon icon-left user-invite" user-id="{{user.id}}" data-toggle="modal" data-target="#user-activate"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
                                         {% endif %}
                                         <button class="btn btn-danger btn-icon icon-left user-delete" user-id="{{user.id}}" data-toggle="modal" data-target="#user-delete" data-original-title="Delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
                                     </div> 

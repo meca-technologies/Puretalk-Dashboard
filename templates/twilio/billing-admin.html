@@ -55,10 +55,28 @@
     .sq-card-wrapper .sq-card-message-no-error::before{
         background-color: #f5365c !important;
     }
-
+    .card-tab{
+        padding-top: .5em;
+        padding-bottom: .5em;
+    }
+    .card-tab:hover{
+        cursor: pointer;
+    }
+    .card-tab.active{
+        background-color: #142540 !important;
+        color: white !important;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        border: 1px solid #101d32;
+        border-bottom: none;
+    }
+    .card-tab-body{
+        background-color: #142540;
+        border: 1px solid #101d32!important;
+    }
 </style>
-<script src="static/js/square.js?v=1.3.11.1"></script>
-<script type="text/javascript" src="https://web.squarecdn.com/v1/square.js"></script>
+<script src="static/js/squareToken.js?v=1.3.11.2"></script>
+<script type="text/javascript" src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
 {% endblock %}
 {% block body %}
 <!-- Header -->
@@ -195,15 +213,48 @@
                     <div class="col-12">
                         <i class="ni ni-credit-card ni-3x"></i>
                     </div>
-                    <div class="col-12 mt-4">
-                        <form id="payment-form mt-4">
-                            <div id="card-container"></div>
-                        </form>
+                    <div class="row border-bottom mt-4">
+                        <div class="col-6 card-tab active" data-target="#square-create-card-body">
+                            <b>Create a Card</b>
+                        </div>
+                        <div class="col-6 card-tab" data-target="#square-select-card-body">
+                            <b>Choose Saved Card</b>
+                        </div>
                     </div>
-                    <div class="col-12">
+                    <div id="square-create-card-body" class="row card-tab-body">
+                        <div class="col-12 mt-4" style="text-align: left;">
+                            <label>Card Details</label>
+                            <form id="payment-form mt-4">
+                                <div id="card-container"></div>
+                            </form>
+                        </div>
+                        <div class="col-12" style="text-align: left;">
+                            <label>Save Card</label>
+                            <input type="checkbox" id="square-save-card">
+                        </div>
+                    </div>
+                    <div id="square-select-card-body" class="row card-tab-body d-none">
+                        <fieldset id="square-group-1" class="col-12">
+                            <div class="row border-bottom" style="text-align: left; border-color: #101d32!important;" v-for="coff in coffs">
+                                <div class="col-3" style="padding-top: 12px;">
+                                    <img v-bind:src="getCardImage(coff.card_brand)" width="50">
+                                </div>
+                                <div class="col-6" style="padding-top: 12px;">
+                                    <p class="mb-0"><b>[[coff.card_type]]</b></p>
+                                    <p class="">Ending in [[coff.last_4]]</p>
+                                </div>
+                                <div class="col-3" style="padding-top: 22px;">
+                                    <input type="radio" class="square-payment-coff" name="square-group-1" v-bind:card-id="coff.square_card_id">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="col-12 mt-2" style="text-align: left;">
+                        <label>Amount</label>
                         <input class="form-control" type="number" placeholder="Amount" id="square-amount">
                     </div>
                 </div>
+                <center><img src="/static/img/spinner.svg" width="100px" id="square-loading-bar" style="display: none;"></center>
             </div>
             <div class="modal-footer">
                 <button id="card-button" type="button" class="btn btn-success">Add Funds</button>
@@ -266,7 +317,7 @@
 <script src="static/vendor/datatables.net-buttons/js/buttons.flash.min.js"></script>
 <script src="static/vendor/datatables.net-buttons/js/buttons.print.min.js"></script>
 <script src="static/vendor/datatables.net-select/js/dataTables.select.min.js"></script>
-<script src="static/js/vueJS/companies.js?v=1.3.11.1"></script>
-<script src="static/js/vueJS/walletadmin.js?v=1.3.11.1"></script>
+<script src="static/js/vueJS/companies.js?v=1.3.11.2"></script>
+<script src="static/js/vueJS/walletadmin.js?v=1.3.11.2"></script>
 
 {% endblock %}
