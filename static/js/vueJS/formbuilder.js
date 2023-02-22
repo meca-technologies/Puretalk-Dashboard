@@ -405,6 +405,7 @@ $('body').on('click','#importCSV', function(){
     else{
         postToAPI('/api/v1/leads', postData, 'POST', 'reloadPage');
     }
+    //postToAPI('/api/v1/forms', splitPost, 'PUT', 'doNothing');
 })
 
 function getLeadStatus(){

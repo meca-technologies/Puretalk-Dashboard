@@ -219,6 +219,9 @@ $('body').on('click','.void-transaction', function(){
 });
 
 function goBetweenNumbers(min, max, rate){
+    console.log(min)
+    console.log(max)
+    console.log(rate)
     if(min < 1){
         min = 1;
     }
@@ -228,6 +231,7 @@ function goBetweenNumbers(min, max, rate){
 
 function smoothTransition(data){
     var currVal = walletDetails.details.paid_balance;
+    //console.log(currVal);
     try{
         var maxVal = data.reduce(myFunc);
     }catch(error){
@@ -236,9 +240,23 @@ function smoothTransition(data){
     if(typeof(maxVal) == 'object'){
         maxVal = data[0]['amount'];
     }
-    console.log(maxVal)
     var rate = goBetweenNumbers(currVal, maxVal, 100);
     var diff = Math.abs(currVal-maxVal);
+    walletDetails.details.paid_balance = maxVal;
+    return;
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    console.log(currVal);
+    //console.log(rate);
+    //console.log(diff);
     if(rate < .3){
         if(diff>2){
             if(rate > 0){
@@ -296,7 +314,7 @@ function myFunc(total, num) {
     else if(typeof(total) == 'object'){
         total_amount = parseFloat(total['amount'])
     }
-    amount = num["type"] == "paid"?parseFloat(num["amount"]):parseFloat(num["amount"])*-1;
+    amount = num["type"] == "paid"?parseFloat(num["amount"]):0;
     //console.log(String(total_amount) + "+" + String(amount));
     //console.log('\n');
     return total_amount + amount;

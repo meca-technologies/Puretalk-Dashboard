@@ -453,7 +453,6 @@ def campaignCallerIDsVerifyAPI():
             postDataList = request.json
             company_caller_ids_col = mongoDB['company_caller_ids']
             callerRow = company_caller_ids_col.find_one({'_id':ObjectId(postDataList['id'])})
-
             company_col = mongoDB['companies']
             company = company_col.find_one({'_id':ObjectId(callerRow['company_id'])})
 

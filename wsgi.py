@@ -1,4 +1,4 @@
-from app import app, logger
+from app import app
 import config
 
 if __name__ == "__main__":

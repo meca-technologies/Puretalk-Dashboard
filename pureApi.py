@@ -2313,7 +2313,7 @@ def userSignupAPI():
                 email_username = email_setting_row['mail_username'] #info@puretalk.ai
                 email_password = email_setting_row['mail_password'] #
                 email_from_name = email_setting_row['mail_from_name'] #Shawn Test
-
+                logger.debug(str(email_setting_row))
                 company_col = mongoDB['companies']
                 company_filter_by = {
                     '_id':ObjectId(updateData['company_id'])

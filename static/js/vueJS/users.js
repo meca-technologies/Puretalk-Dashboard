@@ -193,6 +193,7 @@ $('body').on('click','.user-edit', function(){
     var finishedUsers = false;
     var finishedRoles = false;
     var fullData = {}
+    $("#reset-password-user").prop( "disabled", true );
     var url = '/api/v1/users?userid='+$(this).attr('user-id');
     try{
         document.getElementById("user-edit-loading").style.display = "";
@@ -201,6 +202,7 @@ $('body').on('click','.user-edit', function(){
     var jqxhr = $.get( url, function(data) {
         userDetails.details = data['users'][0];
         fullData['users'] = data['users'][0];
+        $("#reset-password-user").prop( "disabled", false );
     })
     .always(function() {
         console.log(fullData);

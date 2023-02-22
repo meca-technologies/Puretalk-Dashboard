@@ -39,7 +39,7 @@ app.secret_key = '2abceVR5ENE7FgMxXdMwuzUJKC2g8xgy'
 
 cors = CORS(app, resources={r"/api/v2": {"origins": "*"}, r"/leads/generator": {"origins": "*"}})
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-app.mongo_client = pymongo.MongoClient("mongodb+srv://admin:QM6icvpQ6SlOveul@cluster0.vc0rw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+app.mongo_client = pymongo.MongoClient("mongodb+srv://puretalk:9PVQrICWzRBGVaSD@cluster0.vc0rw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 
 # BLUEPRINT
 from pureApi import apiBlueprint, convertToJSON
@@ -697,7 +697,7 @@ def login():
         if config.debug == True:
             return render_template('vicidial/login.html', companyName='PureTalk', pageTitle='Login', navPosition='index', message=message)
         else:
-            return redirect('https://puretalk.ai/login')
+            return render_template('vicidial/login.html', companyName='PureTalk', pageTitle='Login', navPosition='index', message=message)
     elif request.method == 'POST':
         session.clear()
         username = request.form['username']

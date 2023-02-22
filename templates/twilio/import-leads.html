@@ -81,9 +81,7 @@
                                 <hr>
                                 <div class="col-sm-12 col-md-8" id="form-details">
                                     <div class="row mt-4" v-for="detail in fullDetails">
-                                        <div class="col-6" style="text-align: right;" v-bind:select-value="detail.selected_field">
-                                            [[ detail.column_name ]]
-                                        </div>
+                                        <div class="col-6 form-layout-text" style="text-align: right;" v-bind:select-value="detail.selected_field">[[ detail.column_name ]]</div>
                                         <div class="col-6">
                                             <select class="form-control form-layout">
                                                 <option value="skip" selected disabled>Please Select A Field</option>
@@ -107,8 +105,8 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="static/js/vueJS/campaigns.js?v=1.3.11.2"></script>
-<script src="static/js/vueJS/formbuilder.js?v=1.3.11.2"></script>
+<script src="static/js/vueJS/campaigns.js?v=1.3.11.4"></script>
+<script src="static/js/vueJS/formbuilder.js?v=1.3.11.4"></script>
 <script>
     updateCampaigns();
 </script>
