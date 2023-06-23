@@ -191,7 +191,7 @@ server {
     }
 }
 ```
-* To enable the Nginx server block configuration you’ve created, link the file to the sites-enabled directory. You can do this by running the ln command and the -s flag to create a symbolic or soft link, as opposed to a hard link:
+* To enable the Nginx server block configuration you’ve created, link the file to the "sites-enabled" directory. You can do this by running the ln command and the -s flag to create a symbolic or soft link, as opposed to a hard link:
 ```bash
 sudo ln -s /etc/nginx/sites-available/puretalk-dashboard /etc/nginx/sites-enabled
 ```
